@@ -1,47 +1,63 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.service.AuthService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
+    private final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+
+    private final UserServiceImpl service;
     private final PasswordEncoder encoder;
 
-    public AuthServiceImpl(UserDetailsManager manager,
+    public AuthServiceImpl(UserServiceImpl service,
                            PasswordEncoder passwordEncoder) {
-        this.manager = manager;
+        this.service = service;
         this.encoder = passwordEncoder;
     }
 
     @Override
     public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
+        logger.info("login: {}", userName);
+        if (!service.userExistsByUsername(userName)) {
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
+        UserDetails userDetails = service.getByUsername(userName);
         return encoder.matches(password, userDetails.getPassword());
     }
 
     @Override
     public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
+        logger.info("register: {}", register);
+        if (service.userExistsByUsername(register.getUsername())) {
             return false;
         }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
+        User user = User.builder()
                         .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
+                        .email(register.getUsername())
+                        .password(encoder.encode(register.getPassword()))
+                        .firstName(register.getFirstName())
+                        .lastName(register.getLastName())
+                        .phone(register.getPhone())
+                        .role(register.getRole())
+                        .build()
+        ;
+        service.create(user);
         return true;
     }
+
 
 }
