@@ -3,18 +3,18 @@ package ru.skypro.homework.service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.model.User;
+import ru.skypro.homework.model.UserEntity;
 
 public interface UserService {
-    User save(User user);
+    UserEntity save(UserEntity user);
 
-    User create(User user);
+    UserEntity create(UserEntity user);
 
-    User getByUsername(String username);
+    UserEntity getByUsername(String username);
 
     UserDetailsService userDetailsService();
 
-    User getCurrentUser();
+    UserEntity getCurrentUser();
 
     boolean setNewPassword(NewPassword newPassword, Authentication authentication);
 

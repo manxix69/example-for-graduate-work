@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.model.User;
+import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
      * @return сохраненный пользователь
      */
     @Override
-    public User save(User user) {
+    public UserEntity save(UserEntity user) {
         return repository.save(user);
     }
 
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
      * @return созданный пользователь
      */
     @Override
-    public User create(User user) {
+    public UserEntity create(UserEntity user) {
         if (userExistsByUsername(user.getUsername())) {
             throw new RuntimeException("Пользователь с таким именем уже существует");
         }
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
      * @return пользователь
      */
     @Override
-    public User getByUsername(String username) {
+    public UserEntity getByUsername(String username) {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
      * @return текущий пользователь
      */
     @Override
-    public User getCurrentUser() {
+    public UserEntity getCurrentUser() {
         // Получение имени пользователя из контекста Spring Security
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
         return getByUsername(username);
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean setNewPassword(NewPassword newPassword, Authentication authentication) {
         logger.info("setNewPassword: {}, {}", newPassword , authentication);
-        User user;
+        UserEntity user;
         try {
             user = getByUsername(authentication.getName());
         } catch (RuntimeException e) {

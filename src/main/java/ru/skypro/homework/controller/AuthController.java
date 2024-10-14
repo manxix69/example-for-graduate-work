@@ -42,34 +42,4 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/users/me")
-    public ResponseEntity<?> setNewPassword() {
-        log.info("me: {}, {}"/*, authentication*/);
-        /*if (!authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-//        else
-            if (service.setNewPassword(newPassword, authentication)) {
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }*/
-        return null;
-    }
-
-        @PostMapping("/users/set_password")
-//    @PostMapping("/profile")
-    public ResponseEntity<?> setNewPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
-        log.info("setNewPassword: {}, {}", newPassword/*, authentication*/);
-        /*if (!authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-//        else
-            if (service.setNewPassword(newPassword, authentication)) {
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }*/
-        return null;
-    }
 }
