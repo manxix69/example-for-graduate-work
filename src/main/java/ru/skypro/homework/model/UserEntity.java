@@ -1,6 +1,7 @@
 package ru.skypro.homework.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,7 +23,7 @@ public class UserEntity extends ModelEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "username", unique = true, nullable = false)
     private String username;
@@ -49,33 +50,11 @@ public class UserEntity extends ModelEntity {
     @Column(name = "role", nullable = false)
     private Role role;
 
-    /*@Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }*/
-
-    @OneToOne
+//    @OneToOne
     @JsonBackReference
+    @JsonIgnore
+    @Transient
     private PhotoEntity photo;
 
     @OneToMany(mappedBy = "author")
@@ -84,6 +63,7 @@ public class UserEntity extends ModelEntity {
     @OneToMany(mappedBy = "author")
     private Collection<CommentEntity> comments;
 
+    @Column(name = "file_path")
     private String filePath; //путь на ПК
 
     @Override

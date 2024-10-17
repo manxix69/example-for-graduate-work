@@ -22,6 +22,7 @@ public class PhotoEntity {
     private String mediaType;
 
     @Lob
+    @Column(columnDefinition="bytea")
     private byte[] data;
 
     public Integer getId() {
