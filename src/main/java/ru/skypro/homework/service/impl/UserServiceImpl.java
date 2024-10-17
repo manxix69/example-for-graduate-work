@@ -1,121 +1,154 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.controller.UserController;
 import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.model.User;
+import ru.skypro.homework.exception.PasswordIsNotMatchException;
+import ru.skypro.homework.exception.UserNotFoundException;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.repository.PhotoRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.UpdateUser;
 
+import java.io.IOException;
+
+/**
+ * Сервис хранящий логику для управления данными пользователей.
+ */
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository repository;
+    private final UserRepository userRepository;
+    private final PhotoRepository photoRepository;
+    private final UserMapper userMapper;
+    private final ImageServiceImpl imageService;
     private final PasswordEncoder encoder;
-    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-    /**
-     * Сохранение пользователя
-     *
-     * @return сохраненный пользователь
-     */
-    @Override
-    public User save(User user) {
-        return repository.save(user);
-    }
+
+    private final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    @Value("${path.to.photos.folder}")
+    private String photoDir;
 
 
-    /**
-     * Создание пользователя
-     *
-     * @return созданный пользователь
-     */
-    @Override
-    public User create(User user) {
-        if (userExistsByUsername(user.getUsername())) {
-            throw new RuntimeException("Пользователь с таким именем уже существует");
-        }
-
-        if (repository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Пользователь с таким email уже существует");
-        }
-
-        return save(user);
+    public UserServiceImpl(UserRepository userRepository, PhotoRepository photoRepository, UserMapper userMapper, ImageServiceImpl imageService, PasswordEncoder encoder) {
+        this.userRepository = userRepository;
+        this.photoRepository = photoRepository;
+        this.userMapper = userMapper;
+        this.imageService = imageService;
+        this.encoder = encoder;
     }
 
     /**
-     * Получение пользователя по имени пользователя
+     * Метод обновляет пароль текущего, авторизованного пользователя.
+     * <p>Метод получает объект newPass, который содержит два поля со старым и новым паролями.
+     * А так же объект {@link Authentication} из которого можно получить логин
+     * авторизованного пользователя.</p>
+     * Далее метод ищет пользователя с соответствующим логином в репозитории и сохраняет его
+     * в переменную userEntity. Логин получаем из объекта {@link Authentication}.
+     * <p>Далее, метод делает проверку на совпадение старого пароля, введенного пользователем,
+     * и пароля сохраненного в БД. Если пароли совпали, от используя сеттер, в переменную, содержащую пользователя,
+     * сохраняется новый пароль. Переменная (объект userEntity) с новым, измененным паролем
+     * сохраняется в БД.</p>
      *
-     * @return пользователь
+     * @param newPass        объект {@link NewPassword}, содержащий старый и новый пароли.
+     * @param authentication содержит логин авторизованного пользователя.
      */
     @Override
-    public User getByUsername(String username) {
-        return repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+    public void setPassword(NewPassword newPass, Authentication authentication) {
+        logger.info("Запущен метод сервиса setPassword");
 
-    }
-
-    /**
-     * Получение пользователя по имени пользователя
-     * <p>
-     * Нужен для Spring Security
-     *
-     * @return пользователь
-     */
-    @Override
-    public UserDetailsService userDetailsService() {
-        return this::getByUsername;
-    }
-
-    /**
-     * Получение текущего пользователя
-     *
-     * @return текущий пользователь
-     */
-    @Override
-    public User getCurrentUser() {
-        // Получение имени пользователя из контекста Spring Security
-        var username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getByUsername(username);
-    }
-
-    /**
-     * Установка нового пароля
-     *
-     * @return успешность действия по смене
-     */
-    @Override
-    public boolean setNewPassword(NewPassword newPassword, Authentication authentication) {
-        logger.info("setNewPassword: {}, {}", newPassword , authentication);
-        User user;
-        try {
-            user = getByUsername(authentication.getName());
-        } catch (RuntimeException e) {
-            return false;
-        }
-        if (encoder.matches(user.getPassword(), newPassword.getCurrentPassword())) {
-            user.setPassword(encoder.encode(newPassword.getNewPassword()));
-            repository.save(user);
-            return true;
+        String oldPassword = newPass.getCurrentPassword();
+        //получаем в переменную новый пароль и кодируем его
+        String encodeNewPassword = encoder.encode(newPass.getNewPassword());
+        //Находим в БД сущность авторизованного пользователя используя логин из authentication
+        //проверка на null не нужна, т.к. тот факт, что пользователь авторизовался,
+        //говорит о том, что он есть в БД
+        UserEntity userEntity = userRepository.findByUsername(authentication.getName()).get();
+        //проверяем совпадают ли старый пароль, введенный пользователем, и пароль сохраненный в БД
+        if (!encoder.matches(oldPassword, userEntity.getPassword())) {
+            throw new PasswordIsNotMatchException("Пароли не совпадают");
         } else {
-            return false;
+            //пароли совпадают, а значит устанавливаем новый пароль в соответствующее поле сущности
+            userEntity.setPassword(encodeNewPassword);
         }
+        //сохраняем сущность в БД
+        userRepository.save(userEntity);
     }
 
     /**
-     * Получение текущего пользователя
-     *
-     * @return логика
+     * Метод возвращает информацию о текущем, авторизованном пользователе.
+     * Метод, используя объект {@link Authentication#getName()} как параметр userName,
+     * находит в БД {@link UserRepository}, пользователя с соответствующими данными и возвращает его.
+     * @param username
+     * @return объект userEntity
      */
+
+    @Transactional
     @Override
-    public boolean userExistsByUsername(String userName) {
-        return repository.existsByUsername(userName);
+    public UserEntity getUser(String username) {
+        logger.info("Запущен метод сервиса getUser");
+
+        UserEntity user = userRepository.findByUsername(username).get();
+        if (user == null) {
+            throw new UserNotFoundException("Пользователя с таким логином в базе данных нет");
+        }
+        return user;
+    }
+
+    /**
+     * Метод изменяет данные пользователя, а именно имя, фамилию и номер телефона.
+     * <p>В начале метод получает из {@link Authentication} логин авторизованного пользователя
+     * и записывает его в переменную.</p>
+     * <p>По логину находит данные пользователя в БД и кладет их в сущность user.
+     * Сущность user заполняется измененными данными из парамера updateUser.</p>
+     * <p>В итоге измененный объект user сохраняется в БД, и он же возвращается из метода.</p>
+     *
+     * @param updateUser     объект содержащий поля с именем, фамилией и номером телефона.
+     * @param authentication
+     * @return объект user
+     */
+    @Transactional
+    @Override
+    public UserEntity updateUser(UpdateUser updateUser, Authentication authentication) {
+        logger.info("Запущен метод сервиса updateUser");
+
+        //Получаем логин авторизованного пользователя из БД
+        String userName = authentication.getName();
+        //Находим данные авторизованного пользователя
+        UserEntity user = userRepository.findByUsername(userName).get();
+        //Меняем данные пользователя на данные из DTO updateUser
+        user.setFirstName(updateUser.getFirstName());
+        user.setLastName(updateUser.getLastName());
+        user.setPhone(updateUser.getPhone());
+        //сохраняем измененные данные в БД
+        userRepository.save(user);
+        return user;
+    }
+
+    @Transactional
+    @Override
+    public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
+        logger.info("Запущен метод сервиса updateUserImage");
+
+        //достаем пользователя из БД
+        UserEntity userEntity = userRepository.findByUsername(authentication.getName()).get();
+
+        //заполняем поля и возвращаем
+        userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity);
+        logger.info("userEntity создано - {}", userEntity != null);
+
+        //сохранение сущности user в БД
+        userRepository.save(userEntity);
     }
 }
