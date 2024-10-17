@@ -21,11 +21,11 @@ public class CommentEntity {
     private Long createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "author")
     private UserEntity author;
 
     @ManyToOne
-    @JoinColumn(name = "ad_id")
+    @JoinColumn(name = "ad")
     private AdEntity ad;
 
 }

@@ -1,5 +1,7 @@
 package ru.skypro.homework.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,14 +27,16 @@ public class AdEntity extends ModelEntity{
     private String description;
 
     @OneToOne
+    @JoinColumn(name = "photo", nullable = false)
     private PhotoEntity photo;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
+    @ManyToOne (fetch=FetchType.LAZY , cascade=CascadeType.ALL)
+    @JoinColumn(name = "author", nullable = false)
     private UserEntity author;
 
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL)
     private Collection<CommentEntity> comments;
 
+    @Column(name = "file_path")
     private String filePath; //путь на ПК
 }
