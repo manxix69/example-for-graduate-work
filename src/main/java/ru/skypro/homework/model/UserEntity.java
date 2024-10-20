@@ -21,7 +21,7 @@ import java.util.List;
 @Table(name = "users")
 public class UserEntity extends ModelEntity {
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 

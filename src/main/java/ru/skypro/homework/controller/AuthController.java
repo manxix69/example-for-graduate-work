@@ -71,7 +71,7 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
-        logger.info("За запущен метод контроллера: register");
+        logger.info("За запущен метод контроллера: register : {}", register);
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
