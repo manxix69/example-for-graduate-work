@@ -22,7 +22,8 @@ public class PhotoController {
 
     @GetMapping("/image/{photoId}")
     public ResponseEntity<byte[]> getPhotoFromSource(@PathVariable Integer photoId) throws IOException {
-        logger.info("Запущен метод контроллера getPhotoFromSource");
+        logger.info("Запущен метод контроллера getPhotoFromSource {}", photoId);
+
         return ResponseEntity.ok(photoService.getPhoto(photoId));
     }
 }
