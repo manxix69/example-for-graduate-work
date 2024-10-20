@@ -3,7 +3,6 @@ package ru.skypro.homework.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "comments")
 public class CommentEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,5 +25,4 @@ public class CommentEntity {
     @ManyToOne
     @JoinColumn(name = "ad")
     private AdEntity ad;
-
 }
