@@ -1,8 +1,11 @@
 package ru.skypro.homework.mapper;
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.controller.UserController;
 import ru.skypro.homework.contstants.Constants;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
@@ -23,6 +26,8 @@ public class AdMapper {
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
 
+    private final Logger logger = LoggerFactory.getLogger(AdMapper.class);
+
 
     /**
      * Entity -> dto mapping
@@ -31,12 +36,16 @@ public class AdMapper {
      * @return Ad dto class
      */
     public Ad mapToAdDto(AdEntity entity) {
+        logger.info("start method mapToAdDto: {}", entity);
+
         Ad dto = new Ad();
         dto.setAuthor(entity.getAuthor().getId());
         dto.setImage(Constants.URL_PHOTO_CONSTANT + entity.getPhoto().getId());
         dto.setPk(entity.getId());
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
+
+        logger.info("end method mapToAdDto: {}", dto);
         return dto;
     }
 
@@ -48,6 +57,8 @@ public class AdMapper {
      * @return AdEntity entity class
      */
     public AdEntity mapToAdEntity(CreateOrUpdateAd dto, String username) {
+        logger.info("start method mapToAdEntity: {}, {}", dto, username);
+
         UserEntity author = userRepository.findByUsername(username).get();
         if (author == null) {
             throw new UserNotFoundException("User not found");
@@ -57,6 +68,8 @@ public class AdMapper {
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
         entity.setAuthor(author);
+
+        logger.info("end method mapToAdEntity: {}", entity);
         return entity;
     }
 
@@ -67,6 +80,8 @@ public class AdMapper {
      * @return ExtendedAd dto class
      */
     public ExtendedAd mapToExtendedAdDto(AdEntity entity) {
+        logger.info("start method mapToExtendedAdDto: {}", entity);
+
         ExtendedAd dto = new ExtendedAd();
         dto.setPk(entity.getId());
         dto.setAuthorFirstName(entity.getAuthor().getFirstName());
@@ -77,6 +92,8 @@ public class AdMapper {
         dto.setPhone(entity.getAuthor().getPhone());
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
+
+        logger.info("end method mapToExtendedAdDto: {}", dto);
         return dto;
     }
 
@@ -87,10 +104,14 @@ public class AdMapper {
      * @throws IOException
      */
     public PhotoEntity mapMultipartFileToPhoto(MultipartFile image) throws IOException {
+        logger.info("start method mapMultipartFileToPhoto: {}", image);
+
         PhotoEntity photo = new PhotoEntity();
         photo.setData(image.getBytes());
         photo.setMediaType(image.getContentType());
         photo.setFileSize(image.getSize());
+
+        logger.info("end method mapMultipartFileToPhoto: {}", photo);
         return photo;
     }
 }
