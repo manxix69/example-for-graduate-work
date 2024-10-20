@@ -40,5 +40,4 @@ public interface UserService {
      * @throws IOException
      */
     void updateUserImage(MultipartFile image, Authentication authentication) throws IOException;
-
 }
