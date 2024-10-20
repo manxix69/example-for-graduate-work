@@ -78,9 +78,10 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean register(Register register) {
-        logger.info("Запущен метод сервиса register");
+        logger.info("Запущен метод сервиса register ,{}", register);
         UserEntity user = UserMapper.mapFromRegisterToUserEntity(register);
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+        logger.info("Запущен UserMapper.mapFromRegisterToUserEntity ,{}", user);
+        if (userRepository.existsByUsername( user.getUsername() )) {
             throw new UserAlredyExsistException("Такой пользователь существует");
         }
         user.setPassword(encoder.encode(user.getPassword()));

@@ -27,7 +27,7 @@ public class MyUserDetailService implements UserDetailsService {
     @Transactional
     @Override//вызываем в методе логин
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.info("Запущен метод сервиса loadUserByUsername");
+        logger.info("Запущен метод сервиса loadUserByUsername, {}", username);
         UserEntity user = userRepository.findByUsername(username).get();
         if (user == null) {
             throw new UsernameNotFoundException("Пользователь не найден");
