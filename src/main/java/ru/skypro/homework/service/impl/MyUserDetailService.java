@@ -18,7 +18,7 @@ import ru.skypro.homework.repository.UserRepository;
 @Slf4j
 public class MyUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final Logger logger = LoggerFactory.getLogger(AdController.class);
+    private final Logger logger = LoggerFactory.getLogger(MyUserDetailService.class);
 
     public MyUserDetailService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -27,7 +27,8 @@ public class MyUserDetailService implements UserDetailsService {
     @Transactional
     @Override//вызываем в методе логин
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.info("Запущен метод сервиса loadUserByUsername, {}", username);
+        logger.info("Запущен метод MyUserDetailService.loadUserByUsername(): {}" , username);
+
         UserEntity user = userRepository.findByUsername(username).get();
         if (user == null) {
             throw new UsernameNotFoundException("Пользователь не найден");

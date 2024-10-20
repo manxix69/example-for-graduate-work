@@ -17,7 +17,6 @@ import ru.skypro.homework.exception.PhotoOnPcIsAbsentException;
 public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
     private final ImageServiceImpl imageService;
-
     private final Logger logger = LoggerFactory.getLogger(PhotoServiceImpl.class);
 
     public PhotoServiceImpl(PhotoRepository photoRepository, ImageServiceImpl imageService) {
@@ -33,18 +32,15 @@ public class PhotoServiceImpl implements PhotoService {
      * @throws IOException
      */
     public byte[] getPhoto(Integer photoId) throws IOException {
-        logger.info("Запущен метод сервиса getPhoto");
-        logger.info("photoId: {}", photoId);
+        logger.info("Запущен метод PhotoServiceImpl.getPhoto(): {}" , photoId);
 
         PhotoEntity photo = photoRepository.findById(photoId).orElseThrow(PhotoOnDatabaseIsAbsentException::new);
         logger.info("Фото найдено - {}", photo.getData() != null);
 
-        //Если картинка запрошенная с ПК не получена по какой-то причине, достаем ее из БД
-        if (imageService.getPhotoFromDisk(photo) == null) {
+        if (imageService.getPhotoFromDisk(photo) == null) {  //Если картинка запрошенная с ПК не получена по какой-то причине, достаем ее из БД
             return photoRepository.findById(photoId).orElseThrow(PhotoOnPcIsAbsentException::new).getData();
         }
-        //Если предыдущее условие не выполнилось и с картинкой все в порядке, то достаем ее с ПК
-        return imageService.getPhotoFromDisk(photo);
+        return imageService.getPhotoFromDisk(photo); //Если предыдущее условие не выполнилось и с картинкой все в порядке, то достаем ее с ПК
     }
 
 }

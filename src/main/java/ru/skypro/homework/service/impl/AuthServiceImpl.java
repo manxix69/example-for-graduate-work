@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.controller.AdController;
 import ru.skypro.homework.dto.Register;
 import ru.skypro.homework.exception.UserAlreadyExistException;
 import ru.skypro.homework.exception.WrongPasswordException;
@@ -24,8 +23,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final MyUserDetailService myUserDetailService;
 
-    private final Logger logger = LoggerFactory.getLogger(AdController.class);
-    
+    private final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+
     public AuthServiceImpl(PasswordEncoder passwordEncoder,
                            UserRepository userRepository,
                            MyUserDetailService myUserDetailService) {
@@ -52,11 +51,14 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean login(String userName, String password) {
-        logger.info("Запущен метод сервиса login");
+        logger.info("Запущен метод AuthServiceImpl.login(): {}, {}", userName, password.getClass());
+
         UserDetails userDetails = myUserDetailService.loadUserByUsername(userName);
         if (!encoder.matches(password, userDetails.getPassword())) {
             throw new WrongPasswordException("Неверный пароль");
         }
+
+        logger.info("Выполнен метод AuthServiceImpl.login()");
         return true;
     }
 
@@ -77,15 +79,16 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean register(Register register) {
-        logger.info("Запущен метод сервиса register ,{}", register);
+        logger.info("Запущен метод AuthServiceImpl.register(): {}", register);
+
         UserEntity user = UserMapper.mapFromRegisterToUserEntity(register);
-        logger.info("Запущен UserMapper.mapFromRegisterToUserEntity ,{}", user);
-        if (userRepository.existsByUsername( user.getUsername() )) {
+        if (userRepository.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistException("Такой пользователь существует");
         }
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
+
+        logger.info("Выполнен метод AuthServiceImpl.register()");
         return true;
     }
-
 }
