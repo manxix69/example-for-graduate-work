@@ -23,7 +23,7 @@ public class CommentMapper {
 
         Comment dto = new Comment();
         dto.setAuthor(entity.getAuthor().getId());
-        dto.setAuthorImage(Constants.URL_PHOTO_CONSTANT + entity.getAuthor().getPhoto().getId());
+        dto.setAuthorImage(Constants.URL_PHOTO_CONSTANT + (entity.getAuthor().getPhoto() == null ? null : entity.getAuthor().getPhoto().getId() ));
         dto.setAuthorFirstName(entity.getAuthor().getFirstName());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setPk(entity.getId());

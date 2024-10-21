@@ -77,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
     public Comment addComment(Integer id, CreateOrUpdateComment createOrUpdateComment, String username) {
         logger.info("Запущен метод CommentServiceImpl.addComment(): {}, {}, {}" , id, createOrUpdateComment, username);
 
-        UserEntity author = userService.getUser(username);//todo заменить метод на getUser
+        UserEntity author = userService.getUser(username);
         AdEntity ad = adRepository.findById(id).orElse(null);
 
         CommentEntity commentEntity = new CommentEntity(); //Создаем сущность comment и заполняем поля
@@ -91,10 +91,9 @@ public class CommentServiceImpl implements CommentService {
         author.getComments().add(commentEntity); //Заполняем поле с комментариями у пользователя и сохраняем в БД
         userRepository.save(author);
 
-        Integer avatarId = author.getPhoto().getId();
         Comment commentDTO = new Comment(); //Создаем возвращаемую сущность ДТО comment и заполняем поля
         commentDTO.setAuthor(author.getId());
-        commentDTO.setAuthorImage("/photo/image/" + avatarId);
+        commentDTO.setAuthorImage("/photo/image/" + (author.getPhoto() == null ? null : author.getPhoto().getId() ) );
         commentDTO.setAuthorFirstName(author.getFirstName());
         commentDTO.setCreatedAt(commentEntity.getCreatedAt());
         commentDTO.setPk(commentRepository.findFirstByText(createOrUpdateComment.getText()).getId());

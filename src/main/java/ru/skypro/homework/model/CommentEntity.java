@@ -25,4 +25,15 @@ public class CommentEntity {
     @ManyToOne
     @JoinColumn(name = "ad")
     private AdEntity ad;
+
+    @Override
+    public String toString() {
+        return "CommentEntity{"
+                + "id=" + id +
+                ", text='" + text + '\'' +
+                ", createdAt=" + createdAt +
+                ", author=" + author +
+//                ", ad=" + ad +
+                '}';
+    }
 }
