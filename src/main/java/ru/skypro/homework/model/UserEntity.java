@@ -66,9 +66,9 @@ public class UserEntity extends ModelEntity {
                 ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", role=" + role +
-                ", photo=" + photo +
-                ", ads=" + ads +
-                ", comments=" + comments +
+                ", photo=" + (photo == null ? null : photo.getFilePath() ) +
+                ", ads.count=" + (ads == null ? null : ads.size() ) +
+                ", comments.count=" + (comments == null ? null : comments.size() )+
                 '}';
     }
 }
