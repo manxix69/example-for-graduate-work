@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.skypro.homework.controller.UserController;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -27,5 +26,7 @@ public class BasicAuthCorsFilter extends OncePerRequestFilter {
 
         httpServletResponse.addHeader("Access-Control-Allow-Credentials", "true");
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+
+        logger.info("Выполнен метод фильтра doFilterInternal");
     }
 }
