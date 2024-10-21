@@ -59,7 +59,7 @@ public class AdMapper {
     public AdEntity mapToAdEntity(CreateOrUpdateAd dto, String username) {
         logger.info("start method mapToAdEntity: {}, {}", dto, username);
 
-        UserEntity author = userRepository.findByUsername(username).get();
+        UserEntity author = userRepository.findByUsername(username);
         if (author == null) {
             throw new UserNotFoundException("User not found");
         }
