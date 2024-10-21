@@ -29,7 +29,7 @@ public class MyUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         logger.info("Запущен метод MyUserDetailService.loadUserByUsername(): {}" , username);
 
-        UserEntity user = userRepository.findByUsername(username).get();
+        UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("Пользователь не найден");
         }

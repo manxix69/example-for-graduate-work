@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
         String oldPassword = newPass.getCurrentPassword();
         String encodeNewPassword = encoder.encode(newPass.getNewPassword()); //получаем в переменную новый пароль и кодируем его
-        UserEntity userEntity = userRepository.findByUsername(authentication.getName()).get(); //Находим в БД сущность авторизованного пользователя используя логин из authentication
+        UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //Находим в БД сущность авторизованного пользователя используя логин из authentication
         if (!encoder.matches(oldPassword, userEntity.getPassword())) { //проверяем совпадают ли старый пароль, введенный пользователем, и пароль сохраненный в БД
             throw new PasswordIsNotMatchException("Пароли не совпадают");
         } else { //пароли совпадают, а значит устанавливаем новый пароль в соответствующее поле сущности
@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
     public UserEntity getUser(String username) {
         logger.info("Запущен метод UserServiceImpl.getUser(): {}" , username);
 
-        UserEntity user = userRepository.findByUsername(username).get();
+        UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException("Пользователя с таким логином в базе данных нет");
         }
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
         logger.info("Запущен метод UserServiceImpl.updateUser(): {}, {}" , updateUser, authentication.getName());
 
         String userName = authentication.getName(); //Получаем логин авторизованного пользователя из БД
-        UserEntity user = userRepository.findByUsername(userName).get(); //Находим данные авторизованного пользователя
+        UserEntity user = userRepository.findByUsername(userName); //Находим данные авторизованного пользователя
         user.setFirstName(updateUser.getFirstName()); //Меняем данные пользователя на данные из DTO updateUser
         user.setLastName(updateUser.getLastName());
         user.setPhone(updateUser.getPhone());
@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserService {
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
         logger.info("Запущен метод UserServiceImpl.updateUserImage(): {}, {}" , image, authentication.getName());
 
-        UserEntity userEntity = userRepository.findByUsername(authentication.getName()).get(); //достаем пользователя из БД
+        UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //достаем пользователя из БД
         userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity); //заполняем поля и возвращаем
 
         logger.info("userEntity создано - {}", userEntity != null);
