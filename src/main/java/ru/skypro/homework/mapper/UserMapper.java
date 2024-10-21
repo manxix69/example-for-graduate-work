@@ -57,7 +57,9 @@ public class UserMapper {
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
         dto.setPhone(entity.getPhone());
-        dto.setImage(Constants.URL_PHOTO_CONSTANT + entity.getPhoto().getId());
+        if (entity.getPhoto() != null) {
+            dto.setImage(Constants.URL_PHOTO_CONSTANT + entity.getPhoto().getId());
+        }
 
         logger.info("end method mapFromUserEntityToUser: {}", dto);
         return dto;
