@@ -31,7 +31,7 @@ import java.io.IOException;
 public class AdController {
 
     private final AdService adService;
-    
+
     private final Logger logger = LoggerFactory.getLogger(AdController.class);
 
     @Operation(
@@ -50,7 +50,7 @@ public class AdController {
     )
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
-        logger.info("За запущен метод контроллера: getAllAds");
+        logger.info("Запущен метод контроллера: getAllAds");
         return ResponseEntity.ok(adService.getAllAds());
     }
 
@@ -77,7 +77,8 @@ public class AdController {
     public ResponseEntity<Ad> addAd(@RequestPart(value = "properties", required = false) CreateOrUpdateAd properties,
                                     @RequestPart("image") MultipartFile image,
                                     Authentication authentication) throws IOException {
-        logger.info("За запущен метод контроллера: addAd");
+        logger.info("Запущен метод контроллера: addAd {}, {}, {}", properties, image, authentication.getName());
+
         return ResponseEntity.ok(adService.addAd(properties, image, authentication));
     }
 
@@ -104,7 +105,8 @@ public class AdController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAd> getAds(@PathVariable("id") Integer id) {
-        logger.info("За запущен метод контроллера: getAds");
+        logger.info("За запущен метод контроллера: getAds {}", id);
+
         ExtendedAd ad = adService.getAds(id);
         if (ad != null) {
             return ResponseEntity.ok(ad);
@@ -142,7 +144,8 @@ public class AdController {
     @DeleteMapping("/{id}")
     @PreAuthorize(value = "hasRole('ADMIN') or @adServiceImpl.isAuthorAd(authentication.getName(), #adId)")
     public ResponseEntity removeAd(@PathVariable("id") Integer adId) throws IOException {
-        logger.info("За запущен метод контроллера: removeAd");
+        logger.info("За запущен метод контроллера: removeAd {}", adId);
+
         return (adService.removeAd(adId)) ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -179,7 +182,8 @@ public class AdController {
     @PatchMapping("/{id}")
     @PreAuthorize(value = "hasRole('ADMIN') or @adServiceImpl.isAuthorAd(authentication.getName(), #adId)")
     public ResponseEntity<Ad> updateAds(@PathVariable("id") Integer adId, @RequestBody CreateOrUpdateAd dto) {
-        logger.info("За запущен метод контроллера: updateAds");
+        logger.info("За запущен метод контроллера: updateAds {}", adId, dto);
+
         Ad ad = adService.updateAds(adId, dto);
         if (ad != null) {
             return ResponseEntity.ok(ad);
@@ -210,7 +214,8 @@ public class AdController {
     )
     @GetMapping("/me")
     public ResponseEntity<Ads> getAdsMe(Authentication authentication) {
-        logger.info("За запущен метод контроллера: getAdsMe" );
+        logger.info("За запущен метод контроллера: getAdsMe {}", authentication.getName());
+
         if (authentication.getName() != null) {   //если пользователь авторизовался
             String username = authentication.getName();
             return ResponseEntity.ok(adService.getAdsMe(username));
@@ -255,10 +260,9 @@ public class AdController {
     public ResponseEntity<Void> updateImage(@PathVariable("id") Integer adId,
                                             @RequestPart MultipartFile image,
                                             Authentication authentication) throws IOException {
-        logger.info("За запущен метод контроллера: updateImage");
-        logger.info("adId = {}", adId);
+        logger.info("За запущен метод контроллера: updateImage {}, {}, {}", adId, image, authentication.getName());
+
         adService.updateImage(adId, image);
         return ResponseEntity.ok().build();
-
     }
 }

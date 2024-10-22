@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.controller.UserController;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.exception.PasswordIsNotMatchException;
 import ru.skypro.homework.exception.UserNotFoundException;
@@ -34,12 +33,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final ImageServiceImpl imageService;
     private final PasswordEncoder encoder;
-
-    private final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Value("${path.to.photos.folder}")
     private String photoDir;
-
 
     public UserServiceImpl(UserRepository userRepository, PhotoRepository photoRepository, UserMapper userMapper, ImageServiceImpl imageService, PasswordEncoder encoder) {
         this.userRepository = userRepository;
@@ -66,24 +63,18 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void setPassword(NewPassword newPass, Authentication authentication) {
-        logger.info("Запущен метод сервиса setPassword");
+        logger.info("Запущен метод UserServiceImpl.setPassword(): {}" , newPass.getClass(), authentication.getName());
 
         String oldPassword = newPass.getCurrentPassword();
-        //получаем в переменную новый пароль и кодируем его
-        String encodeNewPassword = encoder.encode(newPass.getNewPassword());
-        //Находим в БД сущность авторизованного пользователя используя логин из authentication
-        //проверка на null не нужна, т.к. тот факт, что пользователь авторизовался,
-        //говорит о том, что он есть в БД
-        UserEntity userEntity = userRepository.findByUsername(authentication.getName()).get();
-        //проверяем совпадают ли старый пароль, введенный пользователем, и пароль сохраненный в БД
-        if (!encoder.matches(oldPassword, userEntity.getPassword())) {
+        String encodeNewPassword = encoder.encode(newPass.getNewPassword()); //получаем в переменную новый пароль и кодируем его
+        UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //Находим в БД сущность авторизованного пользователя используя логин из authentication
+        if (!encoder.matches(oldPassword, userEntity.getPassword())) { //проверяем совпадают ли старый пароль, введенный пользователем, и пароль сохраненный в БД
             throw new PasswordIsNotMatchException("Пароли не совпадают");
-        } else {
-            //пароли совпадают, а значит устанавливаем новый пароль в соответствующее поле сущности
+        } else { //пароли совпадают, а значит устанавливаем новый пароль в соответствующее поле сущности
             userEntity.setPassword(encodeNewPassword);
         }
-        //сохраняем сущность в БД
-        userRepository.save(userEntity);
+        logger.info("Выполняем метод UserServiceImpl.setPassword()");
+        userRepository.save(userEntity); //сохраняем сущность в БД
     }
 
     /**
@@ -93,13 +84,12 @@ public class UserServiceImpl implements UserService {
      * @param username
      * @return объект userEntity
      */
-
     @Transactional
     @Override
     public UserEntity getUser(String username) {
-        logger.info("Запущен метод сервиса getUser");
+        logger.info("Запущен метод UserServiceImpl.getUser(): {}" , username);
 
-        UserEntity user = userRepository.findByUsername(username).get();
+        UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException("Пользователя с таким логином в базе данных нет");
         }
@@ -121,34 +111,28 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity updateUser(UpdateUser updateUser, Authentication authentication) {
-        logger.info("Запущен метод сервиса updateUser");
+        logger.info("Запущен метод UserServiceImpl.updateUser(): {}, {}" , updateUser, authentication.getName());
 
-        //Получаем логин авторизованного пользователя из БД
-        String userName = authentication.getName();
-        //Находим данные авторизованного пользователя
-        UserEntity user = userRepository.findByUsername(userName).get();
-        //Меняем данные пользователя на данные из DTO updateUser
-        user.setFirstName(updateUser.getFirstName());
+        String userName = authentication.getName(); //Получаем логин авторизованного пользователя из БД
+        UserEntity user = userRepository.findByUsername(userName); //Находим данные авторизованного пользователя
+        user.setFirstName(updateUser.getFirstName()); //Меняем данные пользователя на данные из DTO updateUser
         user.setLastName(updateUser.getLastName());
         user.setPhone(updateUser.getPhone());
-        //сохраняем измененные данные в БД
-        userRepository.save(user);
+        userRepository.save(user); //сохраняем измененные данные в БД
+
+        logger.info("Выполнен метод UserServiceImpl.updateUser(): {}" , user);
         return user;
     }
 
     @Transactional
     @Override
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
-        logger.info("Запущен метод сервиса updateUserImage");
+        logger.info("Запущен метод UserServiceImpl.updateUserImage(): {}, {}" , image, authentication.getName());
 
-        //достаем пользователя из БД
-        UserEntity userEntity = userRepository.findByUsername(authentication.getName()).get();
+        UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //достаем пользователя из БД
+        userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity); //заполняем поля и возвращаем
 
-        //заполняем поля и возвращаем
-        userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity);
         logger.info("userEntity создано - {}", userEntity != null);
-
-        //сохранение сущности user в БД
-        userRepository.save(userEntity);
+        userRepository.save(userEntity); //сохранение сущности user в БД
     }
 }

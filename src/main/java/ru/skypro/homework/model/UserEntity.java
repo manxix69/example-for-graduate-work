@@ -3,14 +3,10 @@ package ru.skypro.homework.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Builder
@@ -31,9 +27,6 @@ public class UserEntity extends ModelEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-/*    @Column(name = "email", unique = true, nullable = false)
-    private String email;*/
-
     @Column(name = "first_name")
     private String firstName;
 
@@ -49,9 +42,6 @@ public class UserEntity extends ModelEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
-
-
-//    @OneToOne
     @JsonBackReference
     @JsonIgnore
     @Transient
@@ -76,9 +66,9 @@ public class UserEntity extends ModelEntity {
                 ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", role=" + role +
-                ", photo=" + photo +
-                ", ads=" + ads +
-                ", comments=" + comments +
+                ", photo=" + (photo == null ? null : photo.getFilePath() ) +
+                ", ads.count=" + (ads == null ? null : ads.size() ) +
+                ", comments.count=" + (comments == null ? null : comments.size() )+
                 '}';
     }
 }
