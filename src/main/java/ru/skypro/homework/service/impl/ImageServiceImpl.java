@@ -85,11 +85,12 @@ public class ImageServiceImpl implements ImageService {
         try {
             return Files.readAllBytes(path1);
         } catch (IOException e) {
-            throw new NoSuchFieldException("Искомый файл аватара или фото объявления, отсутствует на ПК\n" +
+            throw new RuntimeException("Искомый файл аватара или фото объявления, отсутствует на ПК\n" +
                     "Поиск файла перенаправлен в БД");
-        } finally {
-            return null;
         }
+//        finally {
+//            return null;
+//        }
     }
 
     /**

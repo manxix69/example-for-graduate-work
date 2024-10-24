@@ -36,11 +36,14 @@ public class PhotoServiceImpl implements PhotoService {
 
         PhotoEntity photo = photoRepository.findById(photoId).orElseThrow(PhotoOnDatabaseIsAbsentException::new);
         logger.info("Фото найдено - {}", photo.getData() != null);
+        byte[] data = imageService.getPhotoFromDisk(photo);
+        logger.info("data :{}", data);
 
-        if (imageService.getPhotoFromDisk(photo) == null) {  //Если картинка запрошенная с ПК не получена по какой-то причине, достаем ее из БД
+        if (data == null) {  //Если картинка запрошенная с ПК не получена по какой-то причине, достаем ее из БД
+            logger.info("картинка запрошенная с ПК не получена по какой-то причине");
             return photoRepository.findById(photoId).orElseThrow(PhotoOnPcIsAbsentException::new).getData();
         }
-        return imageService.getPhotoFromDisk(photo); //Если предыдущее условие не выполнилось и с картинкой все в порядке, то достаем ее с ПК
+        return data; //Если предыдущее условие не выполнилось и с картинкой все в порядке, то достаем ее с ПК
     }
 
 }

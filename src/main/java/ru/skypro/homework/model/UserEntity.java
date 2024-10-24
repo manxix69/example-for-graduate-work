@@ -36,15 +36,22 @@ public class UserEntity extends ModelEntity {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "image")
-    private String image;
+//    @Column(name = "image")
+//    private String image;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
-    @JsonBackReference
-    @JsonIgnore
-    @Transient
+
+//    @JsonBackReference
+//    @JsonIgnore
+//    @Transient
+//    @Column(name = "photo", columnDefinition="bytea")
+//    @ManyToOne
+//    @JoinColumn(name = "photo")
+//    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "photo")
     private PhotoEntity photo;
 
     @OneToMany(mappedBy = "author")

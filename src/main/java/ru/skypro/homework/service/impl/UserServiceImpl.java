@@ -93,6 +93,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new UserNotFoundException("Пользователя с таким логином в базе данных нет");
         }
+        logger.info("выполнен метод UserServiceImpl.getUser(): {}" , user);
         return user;
     }
 
