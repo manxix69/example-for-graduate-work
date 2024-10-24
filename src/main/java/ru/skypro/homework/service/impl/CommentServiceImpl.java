@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skypro.homework.controller.AdController;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
@@ -55,11 +54,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comments getComments(Integer id) {
-        logger.info("Запущен метод сервиса getComments");
+        logger.info("Запущен метод CommentServiceImpl.getComments(): {}" , id);
+
         List<Comment> comments = commentRepository.findByAdId(id).stream()
                 .map(comment -> commentMapper.mapToCommentDto(comment))
                 .collect(Collectors.toList());
 
+        logger.info("выполнен метод CommentServiceImpl.getComments(): {}" , comments.size());
         return new Comments(comments.size(), comments);
     }
 
@@ -74,39 +75,31 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comment addComment(Integer id, CreateOrUpdateComment createOrUpdateComment, String username) {
-        logger.info("Запущен метод сервиса addComment");
+        logger.info("Запущен метод CommentServiceImpl.addComment(): {}, {}, {}" , id, createOrUpdateComment, username);
 
-        UserEntity author = userService.getUser(username);//todo заменить метод на getUser
+        UserEntity author = userService.getUser(username);
         AdEntity ad = adRepository.findById(id).orElse(null);
 
-        //Создаем сущность comment и заполняем поля
-        CommentEntity commentEntity = new CommentEntity();
+        CommentEntity commentEntity = new CommentEntity(); //Создаем сущность comment и заполняем поля
         commentEntity.setAuthor(author);
         commentEntity.setAd(ad);
         commentEntity.setText(createOrUpdateComment.getText());
         commentEntity.setCreatedAt(System.currentTimeMillis());
 
-        //Сохраняем сущность commentEntity в БД
-        commentRepository.save(commentEntity);
+        commentRepository.save(commentEntity); //Сохраняем сущность commentEntity в БД
 
-        //Заполняем поле с комментариями у пользователя и сохраняем в БД
-        author.getComments().add(commentEntity);
+        author.getComments().add(commentEntity); //Заполняем поле с комментариями у пользователя и сохраняем в БД
         userRepository.save(author);
 
-        //Создаем возвращаемую сущность ДТО comment и заполняем поля
-        Comment commentDTO = new Comment();
+        Comment commentDTO = new Comment(); //Создаем возвращаемую сущность ДТО comment и заполняем поля
         commentDTO.setAuthor(author.getId());
-
-        Integer avatarId = author.getPhoto().getId();
-        logger.info("id автора комментария - {}", author.getId());
-        logger.info("URL для получения аватара автора комментария: /photo/image/{}", avatarId);
-        commentDTO.setAuthorImage("/photo/image/" + avatarId);
-
+        commentDTO.setAuthorImage("/photo/image/" + (author.getPhoto() == null ? null : author.getPhoto().getId() ) );
         commentDTO.setAuthorFirstName(author.getFirstName());
         commentDTO.setCreatedAt(commentEntity.getCreatedAt());
         commentDTO.setPk(commentRepository.findFirstByText(createOrUpdateComment.getText()).getId());
         commentDTO.setText(commentRepository.findFirstByText(createOrUpdateComment.getText()).getText());
 
+        logger.info("Выполнен метод CommentServiceImpl.addComment(): {}, {}, {}" , commentDTO, author, commentEntity);
         return commentDTO;
     }
 
@@ -119,7 +112,7 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public String deleteComment(Integer commentId, String username) {
-        logger.info("Запущен метод сервиса deleteComment");
+        logger.info("Запущен метод CommentServiceImpl.deleteComment(): {}, {}" , commentId, username);
 
         Optional<CommentEntity> comment = commentRepository.findById(commentId);
         if (comment.isPresent()) {
@@ -136,6 +129,7 @@ public class CommentServiceImpl implements CommentService {
                 }
             }
         }
+        logger.info("Выполнен метод CommentServiceImpl.deleteComment()");
         return "not found"; //'404' Comment not found
     }
 
@@ -150,7 +144,8 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comment updateComment(Integer commentId, CreateOrUpdateComment createOrUpdateComment, String username) {
-        logger.info("Запущен метод сервиса updateComment");
+        logger.info("Запущен метод CommentServiceImpl.updateComment(): {}, {}, {}" , commentId, createOrUpdateComment, username);
+
         Optional<CommentEntity> commentOptional = commentRepository.findById(commentId);
         if (commentOptional.isPresent()) {
             CommentEntity comment = commentOptional.get();
@@ -163,7 +158,7 @@ public class CommentServiceImpl implements CommentService {
                 return commentMapper.mapToCommentDto(comment); //'403' For the user update is forbidden
             }
         }
+        logger.info("Выполнен метод CommentServiceImpl.updateComment(): {}" , commentOptional);
         return null; //'404' Comment not found
     }
-
 }

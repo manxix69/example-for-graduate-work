@@ -26,7 +26,8 @@ public class CommentController {
     private final UserRepository userRepository;
     private final CommentService commentService;
     private final AdServiceImpl adService;
-    private final Logger logger = LoggerFactory.getLogger(PhotoController.class);
+
+    private final Logger logger = LoggerFactory.getLogger(CommentController.class);
 
     public CommentController(UserRepository userRepository, CommentService commentService, AdServiceImpl adService) {
         this.userRepository = userRepository;
@@ -60,7 +61,8 @@ public class CommentController {
     )
     @GetMapping("/{id}/comments")
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id, Authentication authentication) {
-        logger.info("За запущен метод контроллера: getComments");
+        logger.info("Запущен метод контроллера: getComments {}, {}", id, authentication.getName());
+
         if (authentication.getName() != null) {
             return ResponseEntity.ok(commentService.getComments(id));
         } else {
@@ -96,7 +98,8 @@ public class CommentController {
     public ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
                                               @RequestBody CreateOrUpdateComment createOrUpdateComment,
                                               Authentication authentication) {
-        logger.info("За запущен метод контроллера: addComment");
+        logger.info("За запущен метод контроллера: addComment {}, {}, {}", id, createOrUpdateComment, authentication.getName());
+
         return ResponseEntity.ok(commentService.addComment(id, createOrUpdateComment, authentication.getName()));
     }
 
@@ -131,7 +134,8 @@ public class CommentController {
     public ResponseEntity<?> deleteComment(@PathVariable("adId") Integer adId,
                                            @PathVariable("commentId") Integer commentId,
                                            Authentication authentication) {
-        logger.info("За запущен метод контроллера: deleteComment");
+        logger.info("За запущен метод контроллера: deleteComment {}, {}, {}", adId, commentId, authentication.getName());
+
         if (authentication.getName() != null) {
             String result = commentService.deleteComment(commentId, authentication.getName());
             if (result.equals("forbidden")) {
@@ -181,12 +185,11 @@ public class CommentController {
                                                  @PathVariable("commentId") Integer commentId,
                                                  @RequestBody CreateOrUpdateComment createOrUpdateComment,
                                                  Authentication authentication) {
-        logger.info("За запущен метод контроллера: updateComment");
-        logger.info("adId: {}", adId);
-        logger.info("commentId: {}", commentId);
-        var userRole = authentication.getAuthorities();
-        logger.info("роль пользователя - {}", userRole);
+        logger.info("За запущен метод контроллера: updateComment {}, {}, {}, {}", adId, commentId, createOrUpdateComment, authentication.getName() );
         logger.info("isAuthorAd({})", adService.isAuthorAd(authentication.getName(), adId));
+
+        var userRole = authentication.getAuthorities();
+
         if (authentication.getName() != null) {
             Comment comment = commentService.updateComment(commentId, createOrUpdateComment, authentication.getName());
             return ResponseEntity.ok(comment);

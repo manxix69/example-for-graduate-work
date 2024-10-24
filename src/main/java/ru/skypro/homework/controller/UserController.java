@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
@@ -65,7 +66,7 @@ public class UserController {
     )
     @PostMapping("/set_password") // http://localhost:8080/users/set_password
     public ResponseEntity setPassword(@RequestBody NewPassword newPass, Authentication authentication) {
-        logger.info("Запущен метод контроллера setPassword");
+        logger.info("Запущен метод контроллера setPassword {}, {}", newPass.getClass(), authentication.getName());
 
         userService.setPassword(newPass, authentication);
         return ResponseEntity.ok().build();
@@ -92,7 +93,7 @@ public class UserController {
     )
     @GetMapping("/me") // http://localhost:8080/users/me
     public ResponseEntity<User> getUser(Authentication authentication) {
-        logger.info("Запущен метод контроллера getUser");
+        logger.info("Запущен метод контроллера getUser {}", authentication.getName());
 
         UserEntity user = userService.getUser(authentication.getName());
         if (user != null) {
@@ -123,7 +124,7 @@ public class UserController {
     )
     @PatchMapping("/me") // http://localhost:8080/users/me
     public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser, Authentication authentication) {
-        logger.info("Запущен метод контроллера updateUser");
+        logger.info("Запущен метод контроллера updateUser {}, {}", updateUser, authentication.getName());
 
         UserEntity user = userService.updateUser(updateUser, authentication);
         if (user != null) {
@@ -152,7 +153,8 @@ public class UserController {
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestParam MultipartFile image,
                                                 Authentication authentication) throws IOException {
-        logger.info("Запущен метод контроллера updateUserImage(): {}", image);
+        logger.info("Запущен метод контроллера updateUserImage(): {}, {}", image, authentication.getName());
+
         userService.updateUserImage(image, authentication);
         return ResponseEntity.ok().build();
     }

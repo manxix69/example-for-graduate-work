@@ -1,5 +1,7 @@
 package ru.skypro.homework.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,29 +18,23 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 public class WebSecurityConfig {
 
+    private final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+
     private static final String[] AUTH_WHITELIST = {
-            "/swagger-resources/**",
-            "/swagger-ui.html",
-            "/v3/api-docs",
-            "/webjars/**",
-            "/login",
-            "/register"
+            "/swagger-resources/**"
+            ,"/swagger-ui.html"
+            ,"/v3/api-docs"
+            ,"/webjars/**"
+            ,"/login"
+            ,"/register"
+            ,"/ads"
+            ,"/photo/**"
     };
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user =
-                User.builder()
-                        .username("user@gmail.com")
-                        .password("password")
-                        .passwordEncoder(passwordEncoder::encode)
-                        .roles(Role.USER.name())
-                        .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        logger.info("Started method filterChain: {}", http);
+
         http.csrf()
                 .disable()
                 .authorizeHttpRequests(
@@ -56,7 +52,8 @@ public class WebSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        logger.info("Started method passwordEncoder");
+
         return new BCryptPasswordEncoder();
     }
-
 }

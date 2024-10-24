@@ -45,7 +45,8 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {
-        logger.info("За запущен метод контроллера: login");
+        logger.info("Запущен метод контроллера: login {}", login.getUsername());
+
         if (authService.login(login.getUsername(), login.getPassword())) {
             return ResponseEntity.ok().build();
         } else {
@@ -71,7 +72,8 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
-        logger.info("За запущен метод контроллера: register : {}", register);
+        logger.info("За запущен метод контроллера: register : {}", register.getUsername());
+
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
