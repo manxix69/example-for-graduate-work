@@ -89,9 +89,9 @@ public class AdController {
             summary = "Получить информацию об объявлении",
             responses = {
                     @ApiResponse(
-                            responseCode = "204",
-                            description = "No content",
-                            content = @Content()
+                            responseCode = "200",
+                            description = "OK",
+                            content = @Content(schema = @Schema(implementation = ExtendedAd.class))
                     ),
                     @ApiResponse(
                             responseCode = "401",
