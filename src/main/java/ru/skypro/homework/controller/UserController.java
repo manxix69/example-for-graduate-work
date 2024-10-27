@@ -42,7 +42,6 @@ public class UserController {
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Обновление пароля",
             responses = {
                     @ApiResponse(
@@ -76,7 +75,6 @@ public class UserController {
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Получение информации об авторизованном пользователе",
             responses = {
                     @ApiResponse(
@@ -110,7 +108,6 @@ public class UserController {
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Обновление информации об авторизованном пользователе",
             responses = {
                     @ApiResponse(
@@ -141,7 +138,6 @@ public class UserController {
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Обновление аватара авторизованного пользователя",
             responses = {
                     @ApiResponse(
