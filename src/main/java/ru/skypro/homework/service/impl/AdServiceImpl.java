@@ -18,6 +18,7 @@ import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.PhotoRepository;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.utils.LogShifter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -37,6 +38,7 @@ public class AdServiceImpl implements AdService {
     private final UserServiceImpl userService;
 
     private final Logger logger = LoggerFactory.getLogger(AdServiceImpl.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     @Value("${path.to.photos.folder}")
     private String photoDir;
@@ -60,13 +62,13 @@ public class AdServiceImpl implements AdService {
      */
     @Override
     public Ads getAllAds() {
-        logger.info("Запущен метод AdServiceImpl.getAllAds() ");
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.getAllAds() ");
 
         List<Ad> dtos = adRepository.findAll().stream()
                 .map(entity -> adMapper.mapToAdDto(entity))
                 .collect(Collectors.toList());
 
-        logger.info("Выполнен метод AdServiceImpl.getAllAds() {}", dtos.size());
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.getAllAds() {}", dtos.size());
         return new Ads(dtos.size(), dtos);
     }
 
@@ -81,7 +83,7 @@ public class AdServiceImpl implements AdService {
     public Ad addAd(CreateOrUpdateAd properties,
                     MultipartFile image,
                     Authentication authentication) throws IOException {
-        logger.info("Запущен метод AdServiceImpl.addAd(): {}, {}, {} " , properties, image, authentication.getName());
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.addAd(): {}, {}, {} " , properties, image, authentication.getName());
 
         AdEntity adEntity = new AdEntity(); //создаем сущность
         adEntity.setTitle(properties.getTitle()); //заполняем поля title, price и description, которые берутся из properties
@@ -92,7 +94,7 @@ public class AdServiceImpl implements AdService {
 
         adRepository.save(adEntity); //сохранение сущности adEntity в БД
 
-        logger.info("Выполнен метод AdServiceImpl.addAd(): {} " , adEntity);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.addAd(): {} " , adEntity);
         return adMapper.mapToAdDto(adEntity); //возврат ДТО Ad из метода
     }
 
@@ -105,11 +107,11 @@ public class AdServiceImpl implements AdService {
      */
     @Override
     public ExtendedAd getAds(Integer id) {
-        logger.info("Запущен метод AdServiceImpl.getAds(): {} " , id);
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.getAds(): {} " , id);
 
         AdEntity entity = adRepository.findById(id).get();
 
-        logger.info("Выполнен метод AdServiceImpl.getAds(): {} " , entity);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.getAds(): {} " , entity);
         return adMapper.mapToExtendedAdDto(entity);
     }
 
@@ -122,7 +124,7 @@ public class AdServiceImpl implements AdService {
     @Transactional
     @Override
     public boolean removeAd(Integer id) throws IOException {
-        logger.info("Запущен метод AdServiceImpl.removeAd(): {} " , id);
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.removeAd(): {} " , id);
 
         boolean result;
         AdEntity ad = adRepository.findById(id).get();
@@ -137,7 +139,7 @@ public class AdServiceImpl implements AdService {
             result = false;
         }
 
-        logger.info("Выполнен метод AdServiceImpl.removeAd(): {} " , result);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.removeAd(): {} " , result);
         return result;
     }
 
@@ -151,7 +153,7 @@ public class AdServiceImpl implements AdService {
     @Transactional
     @Override
     public Ad updateAds(Integer id, CreateOrUpdateAd dto) {
-        logger.info("Запущен метод AdServiceImpl.updateAds(): {}, {} " , id, dto);
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.updateAds(): {}, {} " , id, dto);
         
         AdEntity entity = adRepository.findById(id).get();
 
@@ -161,7 +163,7 @@ public class AdServiceImpl implements AdService {
 
         adRepository.save(entity);
 
-        logger.info("Выполнен метод AdServiceImpl.updateAds(): {} " , entity);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.updateAds(): {} " , entity);
         return adMapper.mapToAdDto(entity);
     }
 
@@ -174,7 +176,7 @@ public class AdServiceImpl implements AdService {
     @Override
     @Transactional
     public Ads getAdsMe(String username) {
-        logger.info("Запущен метод AdServiceImpl.getAdsMe(): {}" , username);
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.getAdsMe(): {}" , username);
         
         UserEntity author = userService.getUser(username);
 
@@ -184,27 +186,27 @@ public class AdServiceImpl implements AdService {
                 .collect(Collectors.toList());
         Ads adsDto = new Ads(ads.size(), ads);
 
-        logger.info("Выполнен метод AdServiceImpl.getAdsMe(): {}" , adsDto);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.getAdsMe(): {}" , adsDto);
         return adsDto;
     }
 
     @Transactional
     @Override
     public void updateImage(Integer id, MultipartFile image) throws IOException {
-        logger.info("Запущен метод AdServiceImpl.updateImage(): {}, {}" , id, image);
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.updateImage(): {}, {}" , id, image);
 
         AdEntity adEntity = adRepository.findById(id).orElseThrow(RuntimeException::new); //достаем объявление из БД
         adEntity = (AdEntity) imageService.updateEntitiesPhoto(image, adEntity); //заполняю поля и получаю сущность в переменную
         adRepository.save(adEntity); //сохранение сущности user в БД
-        logger.info("Выполнен метод AdServiceImpl.updateImage(): {}" , adEntity);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.updateImage(): {}" , adEntity);
     }
 
     public boolean isAuthorAd(String username, Integer adId) {
-        logger.info("Запущен метод AdServiceImpl.isAuthorAd(): {}, {}" , username, adId);
+        shifter.shiftLog(logger,"Запущен метод AdServiceImpl.isAuthorAd(): {}, {}" , username, adId);
 
         AdEntity adEntity = adRepository.findById(adId).orElseThrow(RuntimeException::new);
 
-        logger.info("Выполнен метод AdServiceImpl.isAuthorAd(): {}" , adEntity);
+        shifter.shiftBackLog(logger,"Выполнен метод AdServiceImpl.isAuthorAd(): {}" , adEntity);
         return adEntity.getAuthor().getUsername().equals(username);
     }
 }

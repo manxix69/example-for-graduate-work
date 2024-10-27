@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.service.impl.PhotoServiceImpl;
+import ru.skypro.homework.utils.LogShifter;
 
 import java.io.IOException;
 
@@ -19,10 +20,11 @@ public class PhotoController {
     private final PhotoServiceImpl photoService;
 
     private final Logger logger = LoggerFactory.getLogger(PhotoController.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     @GetMapping("/image/{photoId}")
     public ResponseEntity<byte[]> getPhotoFromSource(@PathVariable Integer photoId) throws IOException {
-        logger.info("Запущен метод контроллера getPhotoFromSource {}", photoId);
+        shifter.log(logger,"Запущен метод контроллера getPhotoFromSource {}", photoId);
 
         return ResponseEntity.ok(photoService.getPhoto(photoId));
     }

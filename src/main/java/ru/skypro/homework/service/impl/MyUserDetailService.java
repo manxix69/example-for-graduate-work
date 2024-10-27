@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,12 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.controller.AdController;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.utils.LogShifter;
+
+import java.util.List;
 
 @Service
 @Slf4j
 public class MyUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(MyUserDetailService.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     public MyUserDetailService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -27,16 +33,19 @@ public class MyUserDetailService implements UserDetailsService {
     @Transactional
     @Override//вызываем в методе логин
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.info("Запущен метод MyUserDetailService.loadUserByUsername(): {}" , username);
+        shifter.log(logger, "Запущен метод MyUserDetailService.loadUserByUsername(): {}" , username);
 
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("Пользователь не найден");
         }
+        List<GrantedAuthority> grantedAuthorityList = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_" + user.getRole());
+
         return User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .roles(user.getRole().name())
+                .authorities(grantedAuthorityList)
                 .build();
     }
 }

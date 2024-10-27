@@ -17,6 +17,7 @@ import ru.skypro.homework.dto.*;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.impl.AdServiceImpl;
+import ru.skypro.homework.utils.LogShifter;
 
 @Slf4j
 @RestController
@@ -28,6 +29,7 @@ public class CommentController {
     private final AdServiceImpl adService;
 
     private final Logger logger = LoggerFactory.getLogger(CommentController.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     public CommentController(UserRepository userRepository, CommentService commentService, AdServiceImpl adService) {
         this.userRepository = userRepository;
@@ -61,7 +63,7 @@ public class CommentController {
     )
     @GetMapping("/{id}/comments")
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id, Authentication authentication) {
-        logger.info("Запущен метод контроллера: getComments {}, {}", id, authentication.getName());
+        shifter.log(logger,"Запущен метод контроллера: getComments {}, {}", id, authentication.getName());
 
         if (authentication.getName() != null) {
             return ResponseEntity.ok(commentService.getComments(id));
@@ -98,7 +100,7 @@ public class CommentController {
     public ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
                                               @RequestBody CreateOrUpdateComment createOrUpdateComment,
                                               Authentication authentication) {
-        logger.info("За запущен метод контроллера: addComment {}, {}, {}", id, createOrUpdateComment, authentication.getName());
+        shifter.log(logger,"За запущен метод контроллера: addComment {}, {}, {}", id, createOrUpdateComment, authentication.getName());
 
         return ResponseEntity.ok(commentService.addComment(id, createOrUpdateComment, authentication.getName()));
     }
@@ -133,8 +135,9 @@ public class CommentController {
     @PreAuthorize(value = "hasRole('ADMIN') or @adServiceImpl.isAuthorAd(authentication.getName(), #adId)")
     public ResponseEntity<?> deleteComment(@PathVariable("adId") Integer adId,
                                            @PathVariable("commentId") Integer commentId,
-                                           Authentication authentication) {
-        logger.info("За запущен метод контроллера: deleteComment {}, {}, {}", adId, commentId, authentication.getName());
+                                           Authentication authentication
+    ) {
+        shifter.log(logger,"За запущен метод контроллера: deleteComment {}, {}, {}", adId, commentId, authentication.getName());
 
         if (authentication.getName() != null) {
             String result = commentService.deleteComment(commentId, authentication.getName());
@@ -185,8 +188,8 @@ public class CommentController {
                                                  @PathVariable("commentId") Integer commentId,
                                                  @RequestBody CreateOrUpdateComment createOrUpdateComment,
                                                  Authentication authentication) {
-        logger.info("За запущен метод контроллера: updateComment {}, {}, {}, {}", adId, commentId, createOrUpdateComment, authentication.getName() );
-        logger.info("isAuthorAd({})", adService.isAuthorAd(authentication.getName(), adId));
+        shifter.log(logger,"За запущен метод контроллера: updateComment {}, {}, {}, {}", adId, commentId, createOrUpdateComment, authentication.getName() );
+        shifter.log(logger,"isAuthorAd({})", adService.isAuthorAd(authentication.getName(), adId));
 
         var userRole = authentication.getAuthorities();
 

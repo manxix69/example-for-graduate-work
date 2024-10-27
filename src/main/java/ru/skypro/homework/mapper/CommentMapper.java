@@ -6,11 +6,13 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.contstants.Constants;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.model.CommentEntity;
+import ru.skypro.homework.utils.LogShifter;
 
 
 @Service
 public class CommentMapper {
     private final Logger logger = LoggerFactory.getLogger(CommentMapper.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     /**
      * Entity -> dto mapping
@@ -19,7 +21,7 @@ public class CommentMapper {
      * @return dto class
      */
     public Comment mapToCommentDto(CommentEntity entity) {
-        logger.info("start method mapToCommentDto: {}", entity);
+        shifter.shiftLog(logger, "start method mapToCommentDto: {}", entity);
 
         Comment dto = new Comment();
         dto.setAuthor(entity.getAuthor().getId());
@@ -29,7 +31,7 @@ public class CommentMapper {
         dto.setPk(entity.getId());
         dto.setText(entity.getText());
 
-        logger.info("end method mapToCommentDto: {}", dto);
+        shifter.shiftBackLog(logger,"end method mapToCommentDto: {}", dto);
         return dto;
     }
 }
