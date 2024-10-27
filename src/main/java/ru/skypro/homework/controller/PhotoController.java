@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,24 +29,7 @@ public class PhotoController {
     private final Logger logger = LoggerFactory.getLogger(PhotoController.class);
     private final LogShifter shifter = LogShifter.getLogShifter();
 
-    @Operation(
-            tags = "Картинка",
-            summary = "Получение картинки",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "OK",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized",
-                            content = @Content()
-                    )
-            }
-    )
+    @Hidden
     @GetMapping("/image/{photoId}")
     public ResponseEntity<byte[]> getPhotoFromSource(@PathVariable Integer photoId) throws IOException {
         shifter.log(logger,"Запущен метод контроллера getPhotoFromSource {}", photoId);
