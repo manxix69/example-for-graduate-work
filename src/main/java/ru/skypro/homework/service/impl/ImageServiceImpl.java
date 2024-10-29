@@ -51,6 +51,7 @@ public class ImageServiceImpl implements ImageService {
         entity.setFilePath(filePath.toString());//добавляем в сущность путь на ПК
         this.saveFileOnDisk(image, filePath); //сохранение на ПК
 
+        shifter.log(logger,"*** photoEntity: {}" , photoEntity);
         shifter.shiftBackLog(logger,"Выполнен метод ImageServiceImpl.updateEntitiesPhoto(): {}" , entity);
         return entity;
     }
