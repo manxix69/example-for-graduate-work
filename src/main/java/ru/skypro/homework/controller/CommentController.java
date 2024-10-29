@@ -191,8 +191,6 @@ public class CommentController {
         shifter.log(logger,"За запущен метод контроллера: updateComment {}, {}, {}, {}", adId, commentId, createOrUpdateComment, authentication.getName() );
         shifter.log(logger,"isAuthorAd({})", adService.isAuthorAd(authentication.getName(), adId));
 
-        var userRole = authentication.getAuthorities();
-
         if (authentication.getName() != null) {
             Comment comment = commentService.updateComment(commentId, createOrUpdateComment, authentication.getName());
             return ResponseEntity.ok(comment);
