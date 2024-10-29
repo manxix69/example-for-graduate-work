@@ -91,7 +91,7 @@ public class UserMapper {
      * @return {@link PhotoEntity}
      */
     public PhotoEntity mapMuptipartFileToPhoto(MultipartFile image) {
-        shifter.shiftLog(logger,"Запущен метод сервиса mapMuptipartFileToPhoto: {}", image);
+        shifter.shiftLog(logger,"Запущен метод сервиса mapMuptipartFileToPhoto: {}", image.getName());
 
         PhotoEntity photo = new PhotoEntity();
         try {
