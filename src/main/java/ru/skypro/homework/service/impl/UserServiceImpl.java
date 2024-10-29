@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //достаем пользователя из БД
         userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity); //заполняем поля и возвращаем
 
-        shifter.shiftBackLog(logger,"userEntity создано - {}", userEntity != null);
+        shifter.shiftBackLog(logger,"userEntity создано - {}", userEntity);
         userRepository.save(userEntity); //сохранение сущности user в БД
     }
 }
