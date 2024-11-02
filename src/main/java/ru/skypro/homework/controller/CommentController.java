@@ -63,7 +63,7 @@ public class CommentController {
     )
     @GetMapping("/{id}/comments")
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id, Authentication authentication) {
-        shifter.log(logger,"Запущен метод контроллера: getComments {}, {}", id, authentication.getName());
+        shifter.log(logger, "Запущен метод контроллера: getComments {}, {}", id, authentication.getName());
 
         if (authentication.getName() != null) {
             return ResponseEntity.ok(commentService.getComments(id));
@@ -100,7 +100,7 @@ public class CommentController {
     public ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
                                               @RequestBody CreateOrUpdateComment createOrUpdateComment,
                                               Authentication authentication) {
-        shifter.log(logger,"За запущен метод контроллера: addComment {}, {}, {}", id, createOrUpdateComment, authentication.getName());
+        shifter.log(logger, "За запущен метод контроллера: addComment {}, {}, {}", id, createOrUpdateComment, authentication.getName());
 
         return ResponseEntity.ok(commentService.addComment(id, createOrUpdateComment, authentication.getName()));
     }
@@ -137,7 +137,7 @@ public class CommentController {
                                            @PathVariable("commentId") Integer commentId,
                                            Authentication authentication
     ) {
-        shifter.log(logger,"За запущен метод контроллера: deleteComment {}, {}, {}", adId, commentId, authentication.getName());
+        shifter.log(logger, "За запущен метод контроллера: deleteComment {}, {}, {}", adId, commentId, authentication.getName());
 
         if (authentication.getName() != null) {
             String result = commentService.deleteComment(commentId, authentication.getName());
@@ -188,8 +188,8 @@ public class CommentController {
                                                  @PathVariable("commentId") Integer commentId,
                                                  @RequestBody CreateOrUpdateComment createOrUpdateComment,
                                                  Authentication authentication) {
-        shifter.log(logger,"За запущен метод контроллера: updateComment {}, {}, {}, {}", adId, commentId, createOrUpdateComment, authentication.getName() );
-        shifter.log(logger,"isAuthorAd({})", adService.isAuthorAd(authentication.getName(), adId));
+        shifter.log(logger, "За запущен метод контроллера: updateComment {}, {}, {}, {}", adId, commentId, createOrUpdateComment, authentication.getName());
+        shifter.log(logger, "isAuthorAd({})", adService.isAuthorAd(authentication.getName(), adId));
 
         if (authentication.getName() != null) {
             Comment comment = commentService.updateComment(commentId, createOrUpdateComment, authentication.getName());
