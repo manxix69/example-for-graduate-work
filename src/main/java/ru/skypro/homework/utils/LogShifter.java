@@ -34,16 +34,18 @@ public class LogShifter {
 
     private StringBuilder getShiftLogText() {
         increasedDepthLog();
+
         StringBuilder builder = new StringBuilder();
         appendSpaces(builder, depthLog);
         builder.append(RIGHT_SHIFT);
         return builder;
     }
     private StringBuilder getShiftBackLogText() {
-        decreaseDepthLog();
         StringBuilder builder = new StringBuilder();
         appendSpaces(builder,depthLog);
         builder.append(LEFT_SHIFT);
+
+        decreaseDepthLog();
         return builder;
     }
 
