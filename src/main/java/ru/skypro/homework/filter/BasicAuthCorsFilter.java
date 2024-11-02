@@ -24,14 +24,7 @@ public class BasicAuthCorsFilter extends OncePerRequestFilter {
                                     HttpServletResponse httpServletResponse,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        shifter.shiftLog(logger,"Запущен метод фильтра doFilterInternal {}, {}, {},{},{},{}"
-                , httpServletRequest.getHeaderNames()
-                , httpServletRequest.getAuthType()
-                , httpServletRequest.getContextPath()
-                , httpServletRequest.getMethod()
-                , httpServletResponse.getHeaderNames()
-                , filterChain
-        );
+        shifter.shiftLog(logger,"Запущен метод фильтра doFilterInternal");
 
         httpServletResponse.addHeader("Access-Control-Allow-Credentials", "true");
         filterChain.doFilter(httpServletRequest, httpServletResponse);
