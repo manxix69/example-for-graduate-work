@@ -17,6 +17,7 @@ import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.utils.LogShifter;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final UserServiceImpl userService;
     private final Logger logger = LoggerFactory.getLogger(CommentServiceImpl.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     public CommentServiceImpl(CommentRepository commentRepository,
                               CommentMapper commentMapper,
@@ -54,13 +56,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comments getComments(Integer id) {
-        logger.info("Запущен метод CommentServiceImpl.getComments(): {}" , id);
+        shifter.shiftLog(logger,"Запущен метод CommentServiceImpl.getComments(): {}" , id);
 
         List<Comment> comments = commentRepository.findByAdId(id).stream()
                 .map(comment -> commentMapper.mapToCommentDto(comment))
                 .collect(Collectors.toList());
 
-        logger.info("выполнен метод CommentServiceImpl.getComments(): {}" , comments.size());
+        shifter.shiftBackLog(logger,"выполнен метод CommentServiceImpl.getComments(): {}" , comments.size());
         return new Comments(comments.size(), comments);
     }
 
@@ -75,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comment addComment(Integer id, CreateOrUpdateComment createOrUpdateComment, String username) {
-        logger.info("Запущен метод CommentServiceImpl.addComment(): {}, {}, {}" , id, createOrUpdateComment, username);
+        shifter.shiftLog(logger,"Запущен метод CommentServiceImpl.addComment(): {}, {}, {}" , id, createOrUpdateComment, username);
 
         UserEntity author = userService.getUser(username);
         AdEntity ad = adRepository.findById(id).orElse(null);
@@ -99,7 +101,7 @@ public class CommentServiceImpl implements CommentService {
         commentDTO.setPk(commentRepository.findFirstByText(createOrUpdateComment.getText()).getId());
         commentDTO.setText(commentRepository.findFirstByText(createOrUpdateComment.getText()).getText());
 
-        logger.info("Выполнен метод CommentServiceImpl.addComment(): {}, {}, {}" , commentDTO, author, commentEntity);
+        shifter.shiftBackLog(logger,"Выполнен метод CommentServiceImpl.addComment(): {}, {}, {}" , commentDTO, author, commentEntity);
         return commentDTO;
     }
 
@@ -112,7 +114,7 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public String deleteComment(Integer commentId, String username) {
-        logger.info("Запущен метод CommentServiceImpl.deleteComment(): {}, {}" , commentId, username);
+        shifter.shiftLog(logger,"Запущен метод CommentServiceImpl.deleteComment(): {}, {}" , commentId, username);
 
         Optional<CommentEntity> comment = commentRepository.findById(commentId);
         if (comment.isPresent()) {
@@ -129,7 +131,7 @@ public class CommentServiceImpl implements CommentService {
                 }
             }
         }
-        logger.info("Выполнен метод CommentServiceImpl.deleteComment()");
+        shifter.shiftBackLog(logger,"Выполнен метод CommentServiceImpl.deleteComment()");
         return "not found"; //'404' Comment not found
     }
 
@@ -144,21 +146,25 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comment updateComment(Integer commentId, CreateOrUpdateComment createOrUpdateComment, String username) {
-        logger.info("Запущен метод CommentServiceImpl.updateComment(): {}, {}, {}" , commentId, createOrUpdateComment, username);
+        shifter.shiftLog(logger,"Запущен метод CommentServiceImpl.updateComment(): {}, {}, {}" , commentId, createOrUpdateComment, username);
+
+        Comment comment = null;
 
         Optional<CommentEntity> commentOptional = commentRepository.findById(commentId);
         if (commentOptional.isPresent()) {
-            CommentEntity comment = commentOptional.get();
+            CommentEntity commentEntity = commentOptional.get();
             UserEntity author = userService.getUser(username);
-            if (author.getComments().contains(comment)) {
-                comment.setText(createOrUpdateComment.getText());
-                commentRepository.save(comment);
-                return commentMapper.mapToCommentDto(comment); //'200' Ok, comment updated
+            if (author.getComments().contains(commentEntity)
+            || author.getRole() == Role.ADMIN) {
+                commentEntity.setText(createOrUpdateComment.getText());
+                commentRepository.save(commentEntity);
+                comment = commentMapper.mapToCommentDto(commentEntity); //'200' Ok, comment updated
             } else {
-                return commentMapper.mapToCommentDto(comment); //'403' For the user update is forbidden
+                comment = commentMapper.mapToCommentDto(commentEntity); //'403' For the user update is forbidden
             }
         }
-        logger.info("Выполнен метод CommentServiceImpl.updateComment(): {}" , commentOptional);
-        return null; //'404' Comment not found
+
+        shifter.shiftBackLog(logger,"Выполнен метод CommentServiceImpl.updateComment(): {}" , comment);
+        return comment; //'404' Comment not found
     }
 }

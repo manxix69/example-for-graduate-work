@@ -14,6 +14,7 @@ import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.utils.LogShifter;
 
 @Service
 @Slf4j
@@ -24,6 +25,7 @@ public class AuthServiceImpl implements AuthService {
     private final MyUserDetailService myUserDetailService;
 
     private final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+    private final LogShifter log = LogShifter.getLogShifter();
 
     public AuthServiceImpl(PasswordEncoder passwordEncoder,
                            UserRepository userRepository,
@@ -51,14 +53,14 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean login(String userName, String password) {
-        logger.info("Запущен метод AuthServiceImpl.login(): {}, {}", userName, password.getClass());
+        log.shiftLog(logger,"Запущен метод AuthServiceImpl.login(): {}, {}", userName, password.getClass());
 
         UserDetails userDetails = myUserDetailService.loadUserByUsername(userName);
         if (!encoder.matches(password, userDetails.getPassword())) {
             throw new WrongPasswordException("Неверный пароль");
         }
 
-        logger.info("Выполнен метод AuthServiceImpl.login()");
+        log.shiftBackLog(logger, "Выполнен метод AuthServiceImpl.login()");
         return true;
     }
 
@@ -79,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean register(Register register) {
-        logger.info("Запущен метод AuthServiceImpl.register(): {}", register);
+        log.shiftLog(logger, "Запущен метод AuthServiceImpl.register(): {}", register);
 
         UserEntity user = UserMapper.mapFromRegisterToUserEntity(register);
         if (userRepository.existsByUsername(user.getUsername())) {
@@ -88,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
 
-        logger.info("Выполнен метод AuthServiceImpl.register()");
+        log.shiftLog(logger,"Выполнен метод AuthServiceImpl.register()");
         return true;
     }
 }

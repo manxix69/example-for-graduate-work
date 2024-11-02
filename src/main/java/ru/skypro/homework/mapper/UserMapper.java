@@ -11,6 +11,7 @@ import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.model.PhotoEntity;
 import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.utils.LogShifter;
 
 import java.io.IOException;
 
@@ -22,6 +23,7 @@ import java.io.IOException;
 public class UserMapper {
 
     private final static Logger logger = LoggerFactory.getLogger(UserMapper.class);
+    private final static LogShifter shifter = LogShifter.getLogShifter();
 
     /**
      * {@link Register} -> {@link UserEntity}
@@ -29,7 +31,7 @@ public class UserMapper {
      * @return entity class {@link UserEntity}
      */
     public static UserEntity mapFromRegisterToUserEntity(Register dto) {
-        logger.info("start method mapFromRegisterToUserEntity: {}", dto);
+        shifter.shiftLog(logger,"start method mapFromRegisterToUserEntity: {}", dto);
 
         UserEntity entity = new UserEntity();
         entity.setUsername(dto.getUsername());
@@ -39,7 +41,7 @@ public class UserMapper {
         entity.setPhone(dto.getPhone());
         entity.setRole(dto.getRole());
 
-        logger.info("end method mapFromRegisterToUserEntity: {}", entity);
+        shifter.shiftBackLog(logger, "end method mapFromRegisterToUserEntity: {}", entity);
         return entity;
     }
 
@@ -49,7 +51,7 @@ public class UserMapper {
      * @return dto class {@link User}
      */
     public static User mapFromUserEntityToUser(UserEntity entity) {
-        logger.info("start method mapFromUserEntityToUser: {}", entity);
+        shifter.shiftLog(logger,"start method mapFromUserEntityToUser: {}", entity);
 
         User dto = new User();
         dto.setId(entity.getId());
@@ -57,11 +59,12 @@ public class UserMapper {
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
         dto.setPhone(entity.getPhone());
+        dto.setRole(entity.getRole());
         if (entity.getPhoto() != null) {
             dto.setImage(Constants.URL_PHOTO_CONSTANT + entity.getPhoto().getId());
         }
 
-        logger.info("end method mapFromUserEntityToUser: {}", dto);
+        shifter.shiftBackLog(logger,"end method mapFromUserEntityToUser: {}", dto);
         return dto;
     }
 
@@ -71,14 +74,14 @@ public class UserMapper {
      * @return dto class {@link UpdateUser}
      */
     public static UpdateUser mapFromUserEntityToUpdateUser(UserEntity entity) {
-        logger.info("start method mapFromUserEntityToUpdateUser: {}", entity);
+        shifter.shiftLog(logger,"start method mapFromUserEntityToUpdateUser: {}", entity);
 
         UpdateUser dto = new UpdateUser();
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
         dto.setPhone(entity.getPhone());
 
-        logger.info("end method mapFromUserEntityToUpdateUser: {}", dto);
+        shifter.shiftBackLog(logger,"end method mapFromUserEntityToUpdateUser: {}", dto);
         return dto;
     }
 
@@ -88,7 +91,7 @@ public class UserMapper {
      * @return {@link PhotoEntity}
      */
     public PhotoEntity mapMuptipartFileToPhoto(MultipartFile image) {
-        logger.info("Запущен метод сервиса mapMuptipartFileToPhoto: {}", image);
+        shifter.shiftLog(logger,"Запущен метод сервиса mapMuptipartFileToPhoto: {}", image.getName());
 
         PhotoEntity photo = new PhotoEntity();
         try {
@@ -100,7 +103,7 @@ public class UserMapper {
                     "место ошибки - userMapper.mapMultiPartFileToPhoto()");
         }
 
-        logger.info("end method mapMuptipartFileToPhoto: {}", photo);
+        shifter.shiftBackLog(logger,"end method mapMuptipartFileToPhoto: {}", photo);
         return photo;
     }
 }

@@ -21,6 +21,8 @@ import org.springframework.http.HttpStatus;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.utils.LogShifter;
+
 import java.io.IOException;
 
 @Slf4j
@@ -33,13 +35,13 @@ public class UserController {
     private UserServiceImpl userService;
 
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     public UserController(UserServiceImpl userService) {
         this.userService = userService;
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Обновление пароля",
             responses = {
                     @ApiResponse(
@@ -66,14 +68,13 @@ public class UserController {
     )
     @PostMapping("/set_password") // http://localhost:8080/users/set_password
     public ResponseEntity setPassword(@RequestBody NewPassword newPass, Authentication authentication) {
-        logger.info("Запущен метод контроллера setPassword {}, {}", newPass.getClass(), authentication.getName());
+        shifter.log(logger,"Запущен метод контроллера setPassword {}, {}", newPass.getClass(), authentication.getName());
 
         userService.setPassword(newPass, authentication);
         return ResponseEntity.ok().build();
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Получение информации об авторизованном пользователе",
             responses = {
                     @ApiResponse(
@@ -93,18 +94,20 @@ public class UserController {
     )
     @GetMapping("/me") // http://localhost:8080/users/me
     public ResponseEntity<User> getUser(Authentication authentication) {
-        logger.info("Запущен метод контроллера getUser {}", authentication.getName());
+        shifter.log(logger,"Запущен метод контроллера getUser {}", authentication.getName());
 
         UserEntity user = userService.getUser(authentication.getName());
+        shifter.log(logger, "получили UserEntity: {}" , user);
         if (user != null) {
-            return ResponseEntity.ok(UserMapper.mapFromUserEntityToUser(user));
+            User userEntity = UserMapper.mapFromUserEntityToUser(user);
+            shifter.log(logger, "получили user: {}" , user);
+            return ResponseEntity.ok(userEntity);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Обновление информации об авторизованном пользователе",
             responses = {
                     @ApiResponse(
@@ -124,7 +127,7 @@ public class UserController {
     )
     @PatchMapping("/me") // http://localhost:8080/users/me
     public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser, Authentication authentication) {
-        logger.info("Запущен метод контроллера updateUser {}, {}", updateUser, authentication.getName());
+        shifter.log(logger,"Запущен метод контроллера updateUser {}, {}", updateUser, authentication.getName());
 
         UserEntity user = userService.updateUser(updateUser, authentication);
         if (user != null) {
@@ -135,7 +138,6 @@ public class UserController {
     }
 
     @Operation(
-            tags = "Пользователи",
             summary = "Обновление аватара авторизованного пользователя",
             responses = {
                     @ApiResponse(
@@ -153,7 +155,7 @@ public class UserController {
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestParam MultipartFile image,
                                                 Authentication authentication) throws IOException {
-        logger.info("Запущен метод контроллера updateUserImage(): {}, {}", image, authentication.getName());
+        shifter.log(logger,"Запущен метод контроллера updateUserImage(): {}, {}", image, authentication.getName());
 
         userService.updateUserImage(image, authentication);
         return ResponseEntity.ok().build();

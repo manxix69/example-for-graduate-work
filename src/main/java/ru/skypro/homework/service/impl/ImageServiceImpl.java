@@ -11,6 +11,7 @@ import ru.skypro.homework.model.ModelEntity;
 import ru.skypro.homework.model.PhotoEntity;
 import ru.skypro.homework.repository.PhotoRepository;
 import ru.skypro.homework.service.ImageService;
+import ru.skypro.homework.utils.LogShifter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ public class ImageServiceImpl implements ImageService {
     private final PhotoRepository photoRepository;
     private final UserMapper userMapper;
     private final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     @Value("${path.to.photos.folder}")
     private String photoDir;
@@ -35,7 +37,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public ModelEntity updateEntitiesPhoto(MultipartFile image, ModelEntity entity) throws IOException {
-        logger.info("Запущен метод ImageServiceImpl.updateEntitiesPhoto(): {}, {}" , image, entity);
+        shifter.shiftLog(logger,"Запущен метод ImageServiceImpl.updateEntitiesPhoto(): {}, {}" , image, entity);
 
         if (entity.getPhoto() != null) { //если у сущности уже есть картинка, то нужно ее удалить
             photoRepository.delete(entity.getPhoto());
@@ -49,7 +51,8 @@ public class ImageServiceImpl implements ImageService {
         entity.setFilePath(filePath.toString());//добавляем в сущность путь на ПК
         this.saveFileOnDisk(image, filePath); //сохранение на ПК
 
-        logger.info("Выполнен метод ImageServiceImpl.updateEntitiesPhoto(): {}" , entity);
+        shifter.log(logger,"*** photoEntity: {}" , photoEntity);
+        shifter.shiftBackLog(logger,"Выполнен метод ImageServiceImpl.updateEntitiesPhoto(): {}" , entity);
         return entity;
     }
 
@@ -63,7 +66,7 @@ public class ImageServiceImpl implements ImageService {
      */
     @Override
     public boolean saveFileOnDisk(MultipartFile image, Path filePath) throws IOException {
-        logger.info("Запущен метод ImageServiceImpl.saveFileOnDisk(): {}, {}" , image, filePath);
+        shifter.shiftLog(logger,"Запущен метод ImageServiceImpl.saveFileOnDisk(): {}, {}" , image, filePath);
 
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
@@ -73,22 +76,23 @@ public class ImageServiceImpl implements ImageService {
              BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
         ) {
             bis.transferTo(bos);
+        } catch (IOException e) {
+            shifter.shiftBackLog(logger,"Возникло исключение в методе ImageServiceImpl.saveFileOnDisk() {}", e);
+            throw e;
         }
-        logger.info("Выполнен метод ImageServiceImpl.saveFileOnDisk()");
+        shifter.shiftBackLog(logger,"Выполнен метод ImageServiceImpl.saveFileOnDisk()");
         return true;
     }
 
     public byte[] getPhotoFromDisk(PhotoEntity photo) {
-        logger.info("Запущен метод ImageServiceImpl.getPhotoFromDisk(): {}" , photo);
+        shifter.log(logger, "Запущен метод ImageServiceImpl.getPhotoFromDisk(): {}" , photo);
 
         Path path1 = Path.of(photo.getFilePath());
         try {
             return Files.readAllBytes(path1);
         } catch (IOException e) {
-            throw new NoSuchFieldException("Искомый файл аватара или фото объявления, отсутствует на ПК\n" +
+            throw new RuntimeException("Искомый файл аватара или фото объявления, отсутствует на ПК\n" +
                     "Поиск файла перенаправлен в БД");
-        } finally {
-            return null;
         }
     }
 
@@ -100,7 +104,7 @@ public class ImageServiceImpl implements ImageService {
      */
     @Override
     public String getExtension(String fileName) {
-        logger.info("Запущен метод ImageServiceImpl.getExtension(): {}" , fileName);
+        shifter.log(logger,"Запущен метод ImageServiceImpl.getExtension(): {}" , fileName);
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 }

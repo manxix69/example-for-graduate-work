@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.UpdateUser;
+import ru.skypro.homework.utils.LogShifter;
 
 import java.io.IOException;
 
@@ -34,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final ImageServiceImpl imageService;
     private final PasswordEncoder encoder;
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     @Value("${path.to.photos.folder}")
     private String photoDir;
@@ -63,7 +65,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void setPassword(NewPassword newPass, Authentication authentication) {
-        logger.info("Запущен метод UserServiceImpl.setPassword(): {}" , newPass.getClass(), authentication.getName());
+        shifter.log(logger,"Запущен метод UserServiceImpl.setPassword(): {}" , newPass.getClass(), authentication.getName());
 
         String oldPassword = newPass.getCurrentPassword();
         String encodeNewPassword = encoder.encode(newPass.getNewPassword()); //получаем в переменную новый пароль и кодируем его
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
         } else { //пароли совпадают, а значит устанавливаем новый пароль в соответствующее поле сущности
             userEntity.setPassword(encodeNewPassword);
         }
-        logger.info("Выполняем метод UserServiceImpl.setPassword()");
+        shifter.log(logger,"Выполняем метод UserServiceImpl.setPassword()");
         userRepository.save(userEntity); //сохраняем сущность в БД
     }
 
@@ -87,12 +89,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity getUser(String username) {
-        logger.info("Запущен метод UserServiceImpl.getUser(): {}" , username);
+        shifter.log(logger,"Запущен метод UserServiceImpl.getUser(): {}" , username);
 
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException("Пользователя с таким логином в базе данных нет");
         }
+        shifter.log(logger,"выполнен метод UserServiceImpl.getUser(): {}" , user);
         return user;
     }
 
@@ -111,7 +114,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity updateUser(UpdateUser updateUser, Authentication authentication) {
-        logger.info("Запущен метод UserServiceImpl.updateUser(): {}, {}" , updateUser, authentication.getName());
+        shifter.shiftLog(logger,"Запущен метод UserServiceImpl.updateUser(): {}, {}" , updateUser, authentication.getName());
 
         String userName = authentication.getName(); //Получаем логин авторизованного пользователя из БД
         UserEntity user = userRepository.findByUsername(userName); //Находим данные авторизованного пользователя
@@ -120,19 +123,19 @@ public class UserServiceImpl implements UserService {
         user.setPhone(updateUser.getPhone());
         userRepository.save(user); //сохраняем измененные данные в БД
 
-        logger.info("Выполнен метод UserServiceImpl.updateUser(): {}" , user);
+        shifter.shiftBackLog(logger,"Выполнен метод UserServiceImpl.updateUser(): {}" , user);
         return user;
     }
 
     @Transactional
     @Override
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
-        logger.info("Запущен метод UserServiceImpl.updateUserImage(): {}, {}" , image, authentication.getName());
+        shifter.shiftLog(logger,"Запущен метод UserServiceImpl.updateUserImage(): {}, {}" , image, authentication.getName());
 
         UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //достаем пользователя из БД
         userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity); //заполняем поля и возвращаем
 
-        logger.info("userEntity создано - {}", userEntity != null);
+        shifter.shiftBackLog(logger,"userEntity создано - {}", userEntity);
         userRepository.save(userEntity); //сохранение сущности user в БД
     }
 }

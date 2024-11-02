@@ -10,6 +10,7 @@ import ru.skypro.homework.service.PhotoService;
 import java.io.IOException;
 import ru.skypro.homework.exception.PhotoOnDatabaseIsAbsentException;
 import ru.skypro.homework.exception.PhotoOnPcIsAbsentException;
+import ru.skypro.homework.utils.LogShifter;
 
 
 @Service
@@ -18,6 +19,7 @@ public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
     private final ImageServiceImpl imageService;
     private final Logger logger = LoggerFactory.getLogger(PhotoServiceImpl.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     public PhotoServiceImpl(PhotoRepository photoRepository, ImageServiceImpl imageService) {
         this.photoRepository = photoRepository;
@@ -32,15 +34,19 @@ public class PhotoServiceImpl implements PhotoService {
      * @throws IOException
      */
     public byte[] getPhoto(Integer photoId) throws IOException {
-        logger.info("Запущен метод PhotoServiceImpl.getPhoto(): {}" , photoId);
+        shifter.shiftLog(logger,"Запущен метод PhotoServiceImpl.getPhoto(): {}" , photoId);
 
         PhotoEntity photo = photoRepository.findById(photoId).orElseThrow(PhotoOnDatabaseIsAbsentException::new);
-        logger.info("Фото найдено - {}", photo.getData() != null);
+        shifter.log(logger,"Фото найдено - {}", photo.getData() != null);
+        byte[] data = imageService.getPhotoFromDisk(photo);
+        shifter.log(logger,"data :{}", data);
 
-        if (imageService.getPhotoFromDisk(photo) == null) {  //Если картинка запрошенная с ПК не получена по какой-то причине, достаем ее из БД
+        if (data == null) {  //Если картинка запрошенная с ПК не получена по какой-то причине, достаем ее из БД
+            shifter.shiftBackLog(logger, "выполнен метод PhotoServiceImpl.getPhoto(),{}", data );
             return photoRepository.findById(photoId).orElseThrow(PhotoOnPcIsAbsentException::new).getData();
         }
-        return imageService.getPhotoFromDisk(photo); //Если предыдущее условие не выполнилось и с картинкой все в порядке, то достаем ее с ПК
+        shifter.shiftBackLog(logger, "выполнен метод PhotoServiceImpl.getPhoto()" );
+        return data; //Если предыдущее условие не выполнилось и с картинкой все в порядке, то достаем ее с ПК
     }
 
 }

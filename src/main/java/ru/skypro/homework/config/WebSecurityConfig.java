@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.utils.LogShifter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -19,6 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class WebSecurityConfig {
 
     private final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**"
@@ -28,32 +30,37 @@ public class WebSecurityConfig {
             ,"/login"
             ,"/register"
             ,"/ads"
+//            ,"/ads/**"
             ,"/photo/**"
+//            ,"/ads/**/comments/**"
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        logger.info("Started method filterChain: {}", http);
+        shifter.log(logger,"Started method filterChain: {}", http.getSharedObjects().values());
 
-        http.csrf()
-                .disable()
+        http.csrf( (csrf) -> csrf.disable())
                 .authorizeHttpRequests(
                         authorization ->
                                 authorization
+//                                        .mvcMatchers("/ads/**")
+//                                        .hasRole("ADMIN")
+//                                        .hasAuthority("ROLE_ADMIN")
                                         .mvcMatchers(AUTH_WHITELIST)
                                         .permitAll()
                                         .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
-                .cors()
-                .and()
+                                        .authenticated()
+                )
+                .cors(withDefaults())
+//                .and()
                 .httpBasic(withDefaults());
+
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        logger.info("Started method passwordEncoder");
-
+        shifter.log(logger, "Started method passwordEncoder");
         return new BCryptPasswordEncoder();
     }
 }

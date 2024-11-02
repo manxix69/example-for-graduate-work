@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.dto.Register;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.utils.LogShifter;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -26,6 +27,7 @@ public class AuthController {
     private final AuthService authService;
 
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private final LogShifter shifter = LogShifter.getLogShifter();
 
     @Operation(
             tags = "Авторизация",
@@ -45,7 +47,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {
-        logger.info("Запущен метод контроллера: login {}", login.getUsername());
+        shifter.log(logger, "Запущен метод контроллера: login {}", login.getUsername());
 
         if (authService.login(login.getUsername(), login.getPassword())) {
             return ResponseEntity.ok().build();
@@ -72,7 +74,7 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
-        logger.info("За запущен метод контроллера: register : {}", register.getUsername());
+        shifter.log(logger, "За запущен метод контроллера: register : {}", register.getUsername());
 
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
