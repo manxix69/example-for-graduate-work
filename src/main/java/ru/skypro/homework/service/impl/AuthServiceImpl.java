@@ -53,9 +53,10 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean login(String userName, String password) {
-        log.shiftLog(logger,"Запущен метод AuthServiceImpl.login(): {}, {}", userName, password.getClass());
+        log.shiftLog(logger, "Запущен метод AuthServiceImpl.login(): {}, {}", userName, password);
 
         UserDetails userDetails = myUserDetailService.loadUserByUsername(userName);
+        log.log(logger, "passes = {} , {} ,{}", (userDetails.getPassword() == password), password, userDetails.getPassword());
         if (!encoder.matches(password, userDetails.getPassword())) {
             throw new WrongPasswordException("Неверный пароль");
         }
@@ -85,12 +86,13 @@ public class AuthServiceImpl implements AuthService {
 
         UserEntity user = UserMapper.mapFromRegisterToUserEntity(register);
         if (userRepository.existsByUsername(user.getUsername())) {
+            log.shiftBackLog(logger, "Exception: Такой пользователь существует");
             throw new UserAlreadyExistException("Такой пользователь существует");
         }
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
 
-        log.shiftLog(logger,"Выполнен метод AuthServiceImpl.register()");
+        log.shiftBackLog(logger, "Выполнен метод AuthServiceImpl.register()");
         return true;
     }
 }
