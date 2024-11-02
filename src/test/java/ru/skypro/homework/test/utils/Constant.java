@@ -1,5 +1,6 @@
 package ru.skypro.homework.test.utils;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +12,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.dto.Role;
-import ru.skypro.homework.dto.UpdateUser;
+import ru.skypro.homework.contstants.Constants;
+import ru.skypro.homework.dto.*;
+import ru.skypro.homework.model.AdEntity;
+import ru.skypro.homework.model.CommentEntity;
 import ru.skypro.homework.model.PhotoEntity;
 import ru.skypro.homework.model.UserEntity;
 
+import javax.persistence.*;
 import java.io.IOException;
+import java.util.Collection;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +32,9 @@ public class Constant {
     public static final String TEST_NEW_PASSWORD = "9876543210";
     public static final NewPassword TEST_NEW_PASSWORD_DTO = new NewPassword();
     public static final UpdateUser TEST_UPDATE_USER = new UpdateUser();
+    public static final CreateOrUpdateAd TEST_CREATE_OR_UPDATE_AD = new CreateOrUpdateAd();
+    public static final Ad TEST_AD = new Ad();
+    public static final AdEntity TEST_AD_ENTITY = new AdEntity();
 
     public static PhotoEntity TEST_PHOTO_ENTITY = null;
     public static Authentication TEST_AUTHENTICATION = null;
@@ -76,6 +82,7 @@ public class Constant {
         photo.setData(file.getBytes());
         photo.setMediaType(file.getContentType());
         photo.setFileSize(file.getSize());
+
         return TEST_PHOTO_ENTITY = photo;
     }
 
@@ -88,5 +95,31 @@ public class Constant {
         testUpdateUser.setFirstName("ANDREY"); //Меняем данные пользователя на данные из DTO updateUser
         testUpdateUser.setLastName("ANDREEV");
         testUpdateUser.setPhone("+7(000)-000-00-22");
+    }
+
+    public static void reloadFields(CreateOrUpdateAd createOrUpdateAd) {
+        createOrUpdateAd.setTitle("Заголовок объвления");
+        createOrUpdateAd.setPrice(8500);
+        createOrUpdateAd.setDescription("Описания объявления");
+    }
+
+    public static void reloadFields(Ad ad) {
+        ad.setTitle("Заголовок объвления");
+        ad.setPrice(8500);
+
+        ad.setAuthor(TEST_USER.getId());
+        ad.setImage(Constants.URL_PHOTO_CONSTANT + TEST_USER.getId());
+        ad.setPk(null);
+    }
+
+    public static void reloadFields(AdEntity ad) {
+        ad.setId(1);
+        ad.setTitle("Заголовок объвления");
+        ad.setPrice(8500);
+        ad.setDescription("Описания объявления");
+        ad.setPhoto(TEST_PHOTO_ENTITY);
+        ad.setAuthor(TEST_USER);
+        ad.setComments(null);
+        ad.setFilePath(Constants.URL_PHOTO_CONSTANT + TEST_USER.getId());
     }
 }
