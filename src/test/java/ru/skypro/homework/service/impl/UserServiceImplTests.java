@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
@@ -20,7 +18,6 @@ import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.exception.PasswordIsNotMatchException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
-import ru.skypro.homework.model.ModelEntity;
 import ru.skypro.homework.model.PhotoEntity;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.PhotoRepository;
@@ -28,8 +25,6 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.test.utils.Constant;
 
 import java.io.IOException;
-
-import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
