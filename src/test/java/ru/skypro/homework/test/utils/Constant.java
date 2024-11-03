@@ -21,7 +21,9 @@ import ru.skypro.homework.model.UserEntity;
 
 import javax.persistence.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -36,9 +38,12 @@ public class Constant {
     public static final Ad TEST_AD = new Ad();
     public static final AdEntity TEST_AD_ENTITY = new AdEntity();
 
+    public static CreateOrUpdateComment TEST_CREATE_OR_UPDATE_COMMENT = null;
     public static PhotoEntity TEST_PHOTO_ENTITY = null;
     public static Authentication TEST_AUTHENTICATION = null;
     public static MultipartFile TEST_MULTIPART_FILE = null;
+    public static CommentEntity TEST_COMMENT_ENTITY = null;
+    public static Comment TEST_COMMENT = null;
 
 
     public static void reloadFields(UserEntity userEntity, PasswordEncoder encoder) {
@@ -51,6 +56,7 @@ public class Constant {
         userEntity.setRole(Role.USER);
         userEntity.setPhoto(null);
         userEntity.setFilePath(null);
+        userEntity.setComments(new ArrayList<CommentEntity>());
     }
 
     public static void reloadFields(Register register) {
@@ -121,5 +127,34 @@ public class Constant {
         ad.setAuthor(TEST_USER);
         ad.setComments(null);
         ad.setFilePath(Constants.URL_PHOTO_CONSTANT + TEST_USER.getId());
+    }
+
+    public static CommentEntity reloadFields(CommentEntity c) {
+        CommentEntity commentEntity = new CommentEntity();
+        commentEntity.setId(1);
+        commentEntity.setText("Описания объявления");
+        commentEntity.setCreatedAt(null);
+        commentEntity.setAuthor(TEST_USER);
+        commentEntity.setAd(TEST_AD_ENTITY);
+        return commentEntity;
+    }
+
+    public static Comment reloadFields(Comment c) {
+        Comment comment = new Comment();
+        comment.setAuthor(TEST_USER.getId());
+        comment.setAuthorImage(Constants.URL_PHOTO_CONSTANT + TEST_USER.getId());
+        comment.setAuthorFirstName(TEST_USER.getFirstName());
+        comment.setCreatedAt(null);
+        comment.setPk(1);
+        comment.setText("Описания объявления");
+
+        return comment;
+    }
+
+
+    public static CreateOrUpdateComment reloadFields(CreateOrUpdateComment c) {
+        CreateOrUpdateComment createOrUpdateComment = new CreateOrUpdateComment();
+        createOrUpdateComment.setText("Текст комментария!");
+        return createOrUpdateComment;
     }
 }
