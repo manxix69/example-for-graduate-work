@@ -37,7 +37,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public ModelEntity updateEntitiesPhoto(MultipartFile image, ModelEntity entity) throws IOException {
-        shifter.shiftLog(logger,"Запущен метод ImageServiceImpl.updateEntitiesPhoto(): {}, {}" , image, entity);
+        shifter.shiftLog(logger, "Запущен метод ImageServiceImpl.updateEntitiesPhoto(): {}, {}", image, entity);
 
         if (entity.getPhoto() != null) { //если у сущности уже есть картинка, то нужно ее удалить
             photoRepository.delete(entity.getPhoto());
@@ -48,11 +48,11 @@ public class ImageServiceImpl implements ImageService {
         Path filePath = Path.of(photoDir, entity.getPhoto().getId() + "."
                 + this.getExtension(image.getOriginalFilename())); //адрес до директории хранения фото на ПК
         entity.getPhoto().setFilePath(filePath.toString()); //добавляем в сущность фото путь где оно хранится на ПК
-        entity.setFilePath(filePath.toString());//добавляем в сущность путь на ПК
+        entity.setFilePath(filePath.toString()); //добавляем в сущность путь на ПК
         this.saveFileOnDisk(image, filePath); //сохранение на ПК
 
-        shifter.log(logger,"*** photoEntity: {}" , photoEntity);
-        shifter.shiftBackLog(logger,"Выполнен метод ImageServiceImpl.updateEntitiesPhoto(): {}" , entity);
+        shifter.log(logger, "*** photoEntity: {}", photoEntity);
+        shifter.shiftBackLog(logger, "Выполнен метод ImageServiceImpl.updateEntitiesPhoto(): {}", entity);
         return entity;
     }
 
@@ -66,7 +66,7 @@ public class ImageServiceImpl implements ImageService {
      */
     @Override
     public boolean saveFileOnDisk(MultipartFile image, Path filePath) throws IOException {
-        shifter.shiftLog(logger,"Запущен метод ImageServiceImpl.saveFileOnDisk(): {}, {}" , image, filePath);
+        shifter.shiftLog(logger, "Запущен метод ImageServiceImpl.saveFileOnDisk(): {}, {}", image, filePath);
 
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
@@ -77,15 +77,15 @@ public class ImageServiceImpl implements ImageService {
         ) {
             bis.transferTo(bos);
         } catch (IOException e) {
-            shifter.shiftBackLog(logger,"Возникло исключение в методе ImageServiceImpl.saveFileOnDisk() {}", e);
+            shifter.shiftBackLog(logger, "Возникло исключение в методе ImageServiceImpl.saveFileOnDisk() {}", e);
             throw e;
         }
-        shifter.shiftBackLog(logger,"Выполнен метод ImageServiceImpl.saveFileOnDisk()");
+        shifter.shiftBackLog(logger, "Выполнен метод ImageServiceImpl.saveFileOnDisk()");
         return true;
     }
 
     public byte[] getPhotoFromDisk(PhotoEntity photo) {
-        shifter.log(logger, "Запущен метод ImageServiceImpl.getPhotoFromDisk(): {}" , photo);
+        shifter.log(logger, "Запущен метод ImageServiceImpl.getPhotoFromDisk(): {}", photo);
 
         Path path1 = Path.of(photo.getFilePath());
         try {
@@ -104,7 +104,7 @@ public class ImageServiceImpl implements ImageService {
      */
     @Override
     public String getExtension(String fileName) {
-        shifter.log(logger,"Запущен метод ImageServiceImpl.getExtension(): {}" , fileName);
+        shifter.log(logger, "Запущен метод ImageServiceImpl.getExtension(): {}", fileName);
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 }

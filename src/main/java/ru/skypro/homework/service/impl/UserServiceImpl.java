@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final ImageServiceImpl imageService;
     private final PasswordEncoder encoder;
+
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final LogShifter shifter = LogShifter.getLogShifter();
 
@@ -65,7 +66,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void setPassword(NewPassword newPass, Authentication authentication) {
-        shifter.log(logger,"Запущен метод UserServiceImpl.setPassword(): {}" , newPass.getClass(), authentication.getName());
+        shifter.log(logger, "Запущен метод UserServiceImpl.setPassword(): {}, {}", newPass, authentication);
 
         String oldPassword = newPass.getCurrentPassword();
         String encodeNewPassword = encoder.encode(newPass.getNewPassword()); //получаем в переменную новый пароль и кодируем его
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
         } else { //пароли совпадают, а значит устанавливаем новый пароль в соответствующее поле сущности
             userEntity.setPassword(encodeNewPassword);
         }
-        shifter.log(logger,"Выполняем метод UserServiceImpl.setPassword()");
+        shifter.log(logger, "Выполняем метод UserServiceImpl.setPassword(): {} ", userEntity);
         userRepository.save(userEntity); //сохраняем сущность в БД
     }
 
@@ -83,19 +84,20 @@ public class UserServiceImpl implements UserService {
      * Метод возвращает информацию о текущем, авторизованном пользователе.
      * Метод, используя объект {@link Authentication#getName()} как параметр userName,
      * находит в БД {@link UserRepository}, пользователя с соответствующими данными и возвращает его.
+     *
      * @param username
      * @return объект userEntity
      */
     @Transactional
     @Override
     public UserEntity getUser(String username) {
-        shifter.log(logger,"Запущен метод UserServiceImpl.getUser(): {}" , username);
+        shifter.log(logger, "Запущен метод UserServiceImpl.getUser(): {}", username);
 
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException("Пользователя с таким логином в базе данных нет");
         }
-        shifter.log(logger,"выполнен метод UserServiceImpl.getUser(): {}" , user);
+        shifter.log(logger, "выполнен метод UserServiceImpl.getUser(): {}", user);
         return user;
     }
 
@@ -114,7 +116,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity updateUser(UpdateUser updateUser, Authentication authentication) {
-        shifter.shiftLog(logger,"Запущен метод UserServiceImpl.updateUser(): {}, {}" , updateUser, authentication.getName());
+        shifter.shiftLog(logger, "Запущен метод UserServiceImpl.updateUser(): {}, {}", updateUser, authentication.getName());
 
         String userName = authentication.getName(); //Получаем логин авторизованного пользователя из БД
         UserEntity user = userRepository.findByUsername(userName); //Находим данные авторизованного пользователя
@@ -123,19 +125,19 @@ public class UserServiceImpl implements UserService {
         user.setPhone(updateUser.getPhone());
         userRepository.save(user); //сохраняем измененные данные в БД
 
-        shifter.shiftBackLog(logger,"Выполнен метод UserServiceImpl.updateUser(): {}" , user);
+        shifter.shiftBackLog(logger, "Выполнен метод UserServiceImpl.updateUser(): {}", user);
         return user;
     }
 
     @Transactional
     @Override
     public void updateUserImage(MultipartFile image, Authentication authentication) throws IOException {
-        shifter.shiftLog(logger,"Запущен метод UserServiceImpl.updateUserImage(): {}, {}" , image, authentication.getName());
+        shifter.shiftLog(logger, "Запущен метод UserServiceImpl.updateUserImage(): {}, {}", image, authentication.getName());
 
         UserEntity userEntity = userRepository.findByUsername(authentication.getName()); //достаем пользователя из БД
         userEntity = (UserEntity) imageService.updateEntitiesPhoto(image, userEntity); //заполняем поля и возвращаем
 
-        shifter.shiftBackLog(logger,"userEntity создано - {}", userEntity);
+        shifter.shiftBackLog(logger, "userEntity создано - {}", userEntity);
         userRepository.save(userEntity); //сохранение сущности user в БД
     }
 }

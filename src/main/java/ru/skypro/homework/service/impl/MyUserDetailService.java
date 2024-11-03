@@ -33,14 +33,16 @@ public class MyUserDetailService implements UserDetailsService {
     @Transactional
     @Override//вызываем в методе логин
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        shifter.log(logger, "Запущен метод MyUserDetailService.loadUserByUsername(): {}" , username);
+        shifter.shiftLog(logger, "Запущен метод MyUserDetailService.loadUserByUsername(): {}", username);
 
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
+            shifter.shiftBackLog(logger, "Пользователь не найден!");
             throw new UsernameNotFoundException("Пользователь не найден");
         }
         List<GrantedAuthority> grantedAuthorityList = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_" + user.getRole());
 
+        shifter.shiftBackLog(logger, "Выполнен метод MyUserDetailService.loadUserByUsername() {}", user);
         return User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())

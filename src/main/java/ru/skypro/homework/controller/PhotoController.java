@@ -32,7 +32,7 @@ public class PhotoController {
     @Hidden
     @GetMapping("/image/{photoId}")
     public ResponseEntity<byte[]> getPhotoFromSource(@PathVariable Integer photoId) throws IOException {
-        shifter.log(logger,"Запущен метод контроллера getPhotoFromSource {}", photoId);
+        shifter.log(logger, "Запущен метод контроллера getPhotoFromSource {}", photoId);
 
         return ResponseEntity.ok(photoService.getPhoto(photoId));
     }

@@ -11,16 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.exception.UserAlreadyExistException;
 import ru.skypro.homework.exception.WrongPasswordException;
-import ru.skypro.homework.model.AdEntity;
-import ru.skypro.homework.model.CommentEntity;
-import ru.skypro.homework.model.PhotoEntity;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
-
-import javax.persistence.*;
-import java.util.Collection;
+import ru.skypro.homework.test.utils.Constant;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -34,25 +30,20 @@ public class AuthServiceImplTests {
     @Autowired
     private MyUserDetailService myUserDetailService;
 
-    private final UserEntity TEST_USER = new UserEntity();
+    private final UserEntity TEST_USER      = Constant.TEST_USER;
+    private final Register TEST_REGISTER    = Constant.TEST_REGISTER;
+    private final String TEST_PASSWORD      = Constant.TEST_PASSWORD;
 
     @BeforeEach
     private void init() {
-        TEST_USER.setId(1);
-        TEST_USER.setUsername("user@mail.ru");
-        TEST_USER.setPassword("1234567890");
-        TEST_USER.setFirstName("IVAN");
-        TEST_USER.setLastName("IVANOV");
-        TEST_USER.setPhone("+7(000)-000-00-00");
-        TEST_USER.setRole(Role.USER);
-        TEST_USER.setPhoto(null);
-        TEST_USER.setFilePath(null);
+        Constant.reloadFields(TEST_USER, encoder);
+        Constant.reloadFields(TEST_REGISTER);
     }
 
     @Test
     public void tryLoginNotExistsUser() {
         Assertions.assertThrows(UsernameNotFoundException.class
-                , () -> authService.login(TEST_USER.getUsername(), TEST_USER.getPassword())
+                , () -> authService.login(TEST_USER.getUsername(), TEST_PASSWORD)
         );
     }
 
@@ -61,15 +52,30 @@ public class AuthServiceImplTests {
         Mockito.when(userRepository.findByUsername(TEST_USER.getUsername())).thenReturn(TEST_USER);
 
         Assertions.assertThrows(WrongPasswordException.class
-                , () -> authService.login(TEST_USER.getUsername(), "wrong!")
+                , () -> authService.login(TEST_USER.getUsername(), "wrong password!")
         );
     }
     @Test
     public void login() {
         Mockito.when(userRepository.findByUsername(TEST_USER.getUsername())).thenReturn(TEST_USER);
-        Assertions.assertTrue(() -> authService.login(TEST_USER.getUsername(), TEST_USER.getPassword()));
+
+        Assertions.assertTrue(() -> authService.login(TEST_USER.getUsername(), TEST_PASSWORD));
     }
 
+    @Test
+    public void tryRegisterUserAlreadyExist(){
+        Mockito.when(userRepository.existsByUsername(TEST_USER.getUsername())).thenReturn(true);
 
+        Assertions.assertThrows(UserAlreadyExistException.class
+                , () -> authService.register(TEST_REGISTER)
+        );
+    }
 
+    @Test
+    public void register(){
+        Mockito.when(userRepository.existsByUsername(TEST_USER.getUsername())).thenReturn(false);
+        Mockito.when(userRepository.save(Mockito.any(UserEntity.class))).thenReturn(null);
+
+        Assertions.assertTrue(() -> authService.register(TEST_REGISTER));
+    }
 }
