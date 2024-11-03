@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.exception.PasswordIsNotMatchException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.AdEntity;
@@ -31,7 +29,6 @@ import ru.skypro.homework.test.utils.Constant;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Optional;
 
 @SpringBootTest
@@ -139,4 +136,37 @@ public class AdServiceImplTests {
 
         Assertions.assertEquals(adService.getAdsMe(TEST_AUTHENTICATION.getName()).getCount(), 0);
     }
+
+    @Test
+    public void updateImage() throws IOException {
+        Mockito.when(adRepository.findById(1)).thenReturn(Optional.of(TEST_AD_ENTITY));
+        Mockito.when(adRepository.save(Mockito.any(AdEntity.class))).thenReturn(null);
+
+        Mockito.when(photoRepository.save(Mockito.any(PhotoEntity.class))).thenReturn(null);
+        Mockito.when(userMapper.mapMuptipartFileToPhoto(Mockito.any(MultipartFile.class))).thenReturn(TEST_PHOTO);
+
+        TEST_PHOTO.setId(1);
+
+        adService.updateImage(1, TEST_FILE);
+
+        Assertions.assertDoesNotThrow(() -> adService.updateImage(1, TEST_FILE));
+    }
+
+    @Test
+    public void isAuthorAd() {
+        Mockito.when(adRepository.findById(1)).thenReturn(Optional.of(TEST_AD_ENTITY));
+        Mockito.when(adRepository.save(Mockito.any(AdEntity.class))).thenReturn(null);
+
+        TEST_AD_ENTITY.setId(1);
+
+        Assertions.assertTrue(adService.isAuthorAd(TEST_AUTHENTICATION.getName(), TEST_AD_ENTITY.getId()));
+    }
+
+    @Test
+    public void getAllAds() {
+        Mockito.when(adRepository.findAll()).thenReturn(new ArrayList<>());
+
+        Assertions.assertEquals(adService.getAllAds().getCount(), 0);
+    }
+
 }
